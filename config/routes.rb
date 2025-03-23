@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
+  mount Rswag::Ui::Engine => "/api-docs"
+  mount Rswag::Api::Engine => "/api-docs"
   root to: redirect("/api/v1/articles")
+  ActiveAdmin.routes(self)
+  devise_for :admin_users, ActiveAdmin::Devise.config
   # THE BELOW SHOULD WORK FOR CREATING SCOPED DEVISE/ActiveAdmin routes
-  # ActiveAdmin.routes(self)
   # devise_for :users, controllers: {
   #   sessions: 'users/sessions',
   #   registrations: 'users/registrations',
@@ -11,7 +14,6 @@ Rails.application.routes.draw do
 
   namespace :admin do
     namespace :v1 do
-      # devise_for :admin_users, ActiveAdmin::Devise.config
       resources :articles
       resources :categories do
         resources :articles, controller: "articles"

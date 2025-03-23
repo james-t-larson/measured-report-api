@@ -7,7 +7,6 @@ class Api::V1::ArticlesController < Api::BaseController
 
   def index
     @articles = Article.all
-    puts @articles
     if params[:category_id].nil?
       generic_render(data: @articles)
     else

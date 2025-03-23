@@ -1,6 +1,15 @@
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
+  namespace :admin do
+    namespace :v1 do
+      resources :articles
+      resources :categories do
+        resources :articles, controller: "articles"
+      end
+    end
+  end
+
   namespace :api do
     namespace :v1 do
       resources :articles, only: [ :index, :show ]

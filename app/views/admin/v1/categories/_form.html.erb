@@ -1,0 +1,32 @@
+<%= form_with(model: admin_v1_category) do |form| %>
+  <% if admin_v1_category.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(admin_v1_category.errors.count, "error") %> prohibited this admin_v1_category from being saved:</h2>
+
+      <ul>
+        <% admin_v1_category.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :slug, style: "display: block" %>
+    <%= form.text_field :slug %>
+  </div>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :position, style: "display: block" %>
+    <%= form.text_field :position %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

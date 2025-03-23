@@ -7,12 +7,11 @@ class Api::V1::ArticlesController < Api::BaseController
 
   def index
     @articles = Article.all
-    @category = Category.find(params[:category_id])
-    puts params
-    puts @category.articles
-    if @category.nil?
+    puts @articles
+    if params[:category_id].nil?
       generic_render(data: @articles)
     else
+      @category = Category.find(params[:category_id])
       generic_render(data: @category.articles, category: @category.name)
     end
   end

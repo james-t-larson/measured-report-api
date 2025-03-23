@@ -1,8 +1,17 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  root to: redirect("/api/v1/articles")
+  # THE BELOW SHOULD WORK FOR CREATING SCOPED DEVISE/ActiveAdmin routes
+  # ActiveAdmin.routes(self)
+  # devise_for :users, controllers: {
+  #   sessions: 'users/sessions',
+  #   registrations: 'users/registrations',
+  #   # Add other controllers as needed
+  # }
+
 
   namespace :admin do
     namespace :v1 do
+      # devise_for :admin_users, ActiveAdmin::Devise.config
       resources :articles
       resources :categories do
         resources :articles, controller: "articles"
@@ -12,6 +21,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      # devise_for :users
       resources :articles, only: [ :index, :show ]
       resources :categories, only: [ :index, :show ] do
         resources :articles, only: [ :index ], controller: "articles"

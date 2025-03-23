@@ -25,7 +25,6 @@ categories.each do |category|
   end
 end
 
-# Create articles
 20.times do
   Article.create!(
     title: Faker::Lorem.sentence(word_count: 5),
@@ -38,4 +37,8 @@ end
   )
 end
 
+
+AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
+
 puts "Seed data created successfully!"
+

@@ -11,8 +11,7 @@ class Api::BaseController < ApplicationController
   # @note This method is used to enforce consistency in the JSON API responses.
   def generic_render(data: {}, message: nil, code: nil, status: nil, **custom_params)
     render json: custom_params.merge({
-      message: message || "Success",
-      code: code || 0,
+      message: message || "success",
       data: data
     }), status: status || :ok
   end

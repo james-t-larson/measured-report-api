@@ -5,12 +5,45 @@ info:
   version: v1
   description: API documentation for version 1
 paths:
-  "/api/v1/articles":
+  "/articles":
     get:
-      summary: list articles
+      summary: Retrieves articles from today
+      tags:
+      - Articles
       responses:
         '200':
-          description: successful
+          description: articles found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    summary:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: date-time
+                    content:
+                      type: string
+                    sources:
+                      type: string
+                  required:
+                  - id
+                  - title
+                  - summary
+                  - created_at
+                  - updated_at
+                  - content
+                  - sources
   "/api/v1/articles/{id}":
     parameters:
     - name: id

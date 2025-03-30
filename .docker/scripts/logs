@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ "$#" -eq 0 ]; then
+  echo "Error: No container name provided."
+  echo "Available containers:"
+  docker ps --format "table {{.Names}}\t{{.ID}}"
+  exit 1
+fi
+
+docker logs -f "$@" 2>/dev/null

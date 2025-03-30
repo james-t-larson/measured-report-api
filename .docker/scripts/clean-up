@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Stopping all running containers..."
+docker stop $(docker ps -aq)
+
+echo "Removing all containers..."
+docker rm $(docker ps -aq)
+
+echo "Removing all images..."
+docker rmi -f $(docker images -q)
+
+echo "Clearing build cache..."
+docker builder prune -af
+
+echo "Docker environment completely reset."

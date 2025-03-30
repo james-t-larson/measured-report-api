@@ -10,7 +10,7 @@ This API provides access to the articles and categories. It uses RESTful princip
 All endpoints are prefixed with  `/api/v1/`.
 
 ## Endpoints
-
+---------------------
 ### Get Article by ID
 
 Retrieves a single article by its unique identifier.
@@ -18,7 +18,6 @@ Retrieves a single article by its unique identifier.
 -   **URL**:  `/articles/{id}`
 -   **Method**: GET
 -   **URL Parameters**:
-    
     -   `id`: The unique identifier of the article
 
 **Example Request:**
@@ -52,6 +51,7 @@ Status: 200 OK
   }
 }
 ```
+---------------------
 ### Get All Categories
 
 Retrieves all available categories.

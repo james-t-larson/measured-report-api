@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  mount Rswag::Ui::Engine => "/api-docs"
-  mount Rswag::Api::Engine => "/api-docs"
+  mount Rswag::Ui::Engine => "/api-docs" unless Rails.env.production?
+  mount Rswag::Api::Engine => "/api-docs" unless Rails.env.production?
   root to: redirect("/api/v1/articles")
   ActiveAdmin.routes(self)
   devise_for :admin_users, ActiveAdmin::Devise.config
@@ -10,7 +10,6 @@ Rails.application.routes.draw do
   #   registrations: 'users/registrations',
   #   # Add other controllers as needed
   # }
-
 
   namespace :admin do
     namespace :v1 do

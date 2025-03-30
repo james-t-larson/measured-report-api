@@ -10,6 +10,20 @@
 
 require 'faker'
 
+def generate_fake_apa_citation
+  word_count = 5
+
+  author = Faker::Name.name
+  date = Time.now.strftime("%Y, %B %d")
+  title = Faker::Lorem.sentence(word_count: word_count)
+  publisher = Faker::Company.name
+  city = Faker::Address.city
+
+  title = title.chomp('.')
+
+  "#{author} (#{date}). #{title}. #{city}: #{publisher}."
+end
+
 categories = [
   { name: 'Technology', slug: 'technology', position: 1 },
   { name: 'Science', slug: 'science', position: 2 },
@@ -30,7 +44,7 @@ end
     title: Faker::Lorem.sentence(word_count: 5),
     summary: Faker::Lorem.paragraph(sentence_count: 2),
     content: Faker::Lorem.paragraphs(number: 3).join("\n\n"),
-    sources: Faker::Internet.url,
+    sources: generate_fake_apa_citation,
     category: Category.order('RANDOM()').first,
     image: Faker::LoremFlickr.image,
     sentiment_score: rand(-1.0..1.0).round(2)
@@ -38,7 +52,6 @@ end
 end
 
 
-AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
+# AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
 
 puts "Seed data created successfully!"
-

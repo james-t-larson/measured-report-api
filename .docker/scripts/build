@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <tag>"
+  exit 1
+fi
+
+TAG=$2
+
+export TAG=$TAG
+
+git checkout tags/$TAG
+
+docker build -t api:$TAG .

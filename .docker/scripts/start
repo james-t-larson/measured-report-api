@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <tag>"
+  exit 1
+fi
+
+CONTAINER_ENV=$1
+TAG=$2
+
+export TAG=$TAG
+export CONTAINER_ENV=$CONTAINER_ENV
+
+docker-compose --env-file "./.docker/env/${CONTAINER_ENV}.env" -f "./.docker/compose/docker-compose.yml" -p "${CONTAINER_ENV}" up -d

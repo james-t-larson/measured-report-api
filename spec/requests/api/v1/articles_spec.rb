@@ -1,88 +1,52 @@
-require 'swagger_helper'
-
 RSpec.describe 'api/v1/articles', type: :request do
-  before do
-    @article = create(:article)
-  end
+  include_context "test_data"
 
-  path '/articles' do
-    get 'Retrieves articles from today' do
-      tags 'Articles'
-      produces 'application/json'
+  describe '/api/v1/articles' do
+    it 'retrieves articles from today' do
+      get '/api/v1/articles'
+      expect(response).to have_http_status(:success)
 
-      response '200', 'articles found' do
-        schema type: :array,
-               items: {
-                 type: :object,
-                 properties: {
-                   id: { type: :integer },
-                   title: { type: :string },
-                   summary: { type: :string },
-                   content: { type: :string },
-                   sources: { type: :string },
-                   category_id: { type: :integer },
-                   image: { type: :string },
-                   sentiment_score: { type: :integer },
-                   created_at: { type: :string, format: 'date-time' },
-                   updated_at: { type: :string, format: 'date-time' }
-                 },
-                 required: [ 'id', 'title', 'summary', 'created_at', 'updated_at', 'content', 'sources' ]
-               }
+      data = JSON.parse(response.body)['data']
+      expect(data.length).to eq(@article_count)
 
-        run_test! do |response|
-          json_response = JSON.parse(response.body.data)
+      @articles.each_with_index do |article, index|
+        article_data = data[index]
 
-          expect(response).to have_http_status(:success)
-          expect(json_response.length).to eq(1)
+        expect(article_data).not_to be_nil
 
-          article_data = json_response.first
-          expect(article_data['id']).to eq(@article.id)
-          expect(article_data['title']).to eq(@article.title)
-          expect(article_data['summary']).to eq(@article.summary)
-          expect(article_data['created_at']).to eq(@article.created_at.as_json)
-          expect(article_data['updated_at']).to eq(@article.updated_at.as_json)
-          expect(article_data['content']).to eq(@article.content.as_json)
-          expect(article_data['sources']).to eq(@article.sources.as_json)
-        end
+        expect(article_data).to include(
+          'id' => article.id,
+          'title' => article.title,
+          'summary' => article.summary,
+          'created_at' => article.created_at.as_json,
+          'updated_at' => article.updated_at.as_json,
+          'content' => article.content.as_json,
+          'sources' => article.sources.as_json
+        )
       end
     end
   end
 
-  # path '/api/v1/articles/{id}' do
-  #   parameter name: 'id', in: :path, type: :string, description: 'id'
-  #
-  #   get('show article') do
-  #     response(200, 'successful') do
-  #       let(:id) { '123' }
-  #
-  #       after do |example|
-  #         example.metadata[:response][:content] = {
-  #           'application/json' => {
-  #             example: JSON.parse(response.body, symbolize_names: true)
-  #           }
-  #         }
-  #       end
-  #       run_test!
-  #     end
-  #   end
-  # end
+  describe '/api/v1/article/:id' do
+    it 'retrieves a specific article by id' do
+      article = @articles.first
 
-  # path '/api/v1/categories/{category_id}/articles' do
-  #   parameter name: 'category_id', in: :path, type: :string, description: 'category_id'
-  #
-  #   get('list articles') do
-  #     response(200, 'successful') do
-  #       let(:category_id) { '123' }
-  #
-  #       after do |example|
-  #         example.metadata[:response][:content] = {
-  #           'application/json' => {
-  #             example: JSON.parse(response.body, symbolize_names: true)
-  #           }
-  #         }
-  #       end
-  #       run_test!
-  #     end
-  #   end
-  # end
+      get "/api/v1/articles/#{article.id}"
+
+      expect(response).to have_http_status(:success)
+
+      article_data = JSON.parse(response.body)['data']
+      expect(article_data).not_to be_nil
+
+      expect(article_data).to include(
+        'id' => article.id,
+        'title' => article.title,
+        'summary' => article.summary,
+        'created_at' => article.created_at.as_json,
+        'updated_at' => article.updated_at.as_json,
+        'content' => article.content.as_json,
+        'sources' => article.sources.as_json
+      )
+    end
+  end
 end

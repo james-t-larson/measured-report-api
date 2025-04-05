@@ -12,6 +12,7 @@ services:
     depends_on:
       - db
       - redis
+    # TODO: Add the correct volumes here to be able to determine which tag/env the volume belongs to
     networks:
       - network
 
@@ -47,6 +48,7 @@ services:
       timeout: 5s
       retries: 5
 
+# t TODO: This should be done in a less repetative way
 volumes:
   develop-db-volume:
     name: ${CONTAINER_ENV}-db-volume

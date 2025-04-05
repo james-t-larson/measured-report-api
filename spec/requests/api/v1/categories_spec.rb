@@ -1,40 +1,25 @@
-require 'swagger_helper'
-
 RSpec.describe 'api/v1/categories', type: :request do
+  include_context "test_data"
 
-  path '/api/v1/categories' do
+  describe '/api/v1/categories' do
+    it 'retrieves all categories' do
+      get '/api/v1/categories'
+      expect(response).to have_http_status(:success)
 
-    get('list categories') do
-      response(200, 'successful') do
+      data = JSON.parse(response.body)['data']
 
-        after do |example|
-          example.metadata[:response][:content] = {
-            'application/json' => {
-              example: JSON.parse(response.body, symbolize_names: true)
-            }
-          }
-        end
-        run_test!
-      end
-    end
-  end
+      expect(data.length).to eq(@categories.length)
 
-  path '/api/v1/categories/{id}' do
-    # You'll want to customize the parameter types...
-    parameter name: 'id', in: :path, type: :string, description: 'id'
+      @categories.each_with_index do |category, index|
+        category_data = data[index]
 
-    get('show category') do
-      response(200, 'successful') do
-        let(:id) { '123' }
-
-        after do |example|
-          example.metadata[:response][:content] = {
-            'application/json' => {
-              example: JSON.parse(response.body, symbolize_names: true)
-            }
-          }
-        end
-        run_test!
+        expect(category_data).not_to be_nil
+        expect(category_data).to include(
+          'id' => category.id,
+          'name' => category.name,
+          'created_at' => category.created_at.as_json,
+          'updated_at' => category.updated_at.as_json
+        )
       end
     end
   end

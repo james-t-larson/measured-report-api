@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
 
   # Will restrict request to specific domains for production
-  before_action :authenticate unless Rails.env.production?
+  before_action :authenticate unless ENV["API_KEY"].nil?
 
   private
 

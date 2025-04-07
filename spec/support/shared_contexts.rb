@@ -1,5 +1,5 @@
 RSpec.shared_context "test_data" do
-  before(:all) do
+  before(:context) do
     @category_count = 5
     @article_count = 10
     @categories = create_list(:category, @category_count)
@@ -8,7 +8,7 @@ RSpec.shared_context "test_data" do
     end
   end
 
-  after(:all) do
+  after(:context) do
     Article.destroy_all
     Category.destroy_all
   end

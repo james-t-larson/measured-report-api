@@ -48,5 +48,14 @@ RSpec.describe 'api/v1/articles', type: :request do
         'sources' => article.sources.as_json
       )
     end
+
+    it 'returns 404 for non-existent article' do
+      non_existant_article = @articles.last.id + 1
+      get "/api/v1/articles/#{non_existant_article}"
+      expect(response).to have_http_status(:not_found)
+
+      error = JSON.parse(response.body)
+      expect(error).to include('message' => 'Record not found')
+    end
   end
 end

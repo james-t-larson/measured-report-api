@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_23_082403) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_19_220452) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -50,7 +50,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_23_082403) do
     t.float "sentiment_score"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "feed_entry_id", null: false
     t.index ["category_id"], name: "index_articles_on_category_id"
+    t.index ["feed_entry_id"], name: "index_articles_on_feed_entry_id"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -59,6 +61,35 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_23_082403) do
     t.bigint "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "feed_entries", force: :cascade do |t|
+    t.bigint "feed_id", null: false
+    t.bigint "category_id", null: false
+    t.string "guid", null: false
+    t.string "title"
+    t.string "summary"
+    t.string "url"
+    t.string "image"
+    t.text "content", null: false
+    t.float "sentiment_score", null: false
+    t.integer "generation_edict", default: 0, null: false
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_feed_entries_on_category_id"
+    t.index ["feed_id", "guid", "url"], name: "index_feed_entries_on_feed_id_and_guid_and_url", unique: true
+    t.index ["feed_id"], name: "index_feed_entries_on_feed_id"
+  end
+
+  create_table "feeds", force: :cascade do |t|
+    t.string "url", null: false
+    t.string "name", null: false
+    t.string "content_class"
+    t.bigint "category_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_feeds_on_category_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -74,4 +105,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_23_082403) do
   end
 
   add_foreign_key "articles", "categories"
+  add_foreign_key "articles", "feed_entries"
+  add_foreign_key "feed_entries", "categories"
+  add_foreign_key "feed_entries", "feeds"
+  add_foreign_key "feeds", "categories"
 end

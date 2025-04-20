@@ -26,7 +26,7 @@ end
 
 categories = [
   { name: 'Technology', slug: 'technology', position: 1 },
-  { name: 'Science', slug: 'science', position: 2 },
+  { name: 'Finance', slug: 'finance', position: 2 },
   { name: 'Politics', slug: 'politics', position: 3 },
   { name: 'Sports', slug: 'sports', position: 4 },
   { name: 'Entertainment', slug: 'entertainment', position: 5 }
@@ -39,17 +39,57 @@ categories.each do |category|
   end
 end
 
-20.times do
-  Article.create!(
-    title: Faker::Lorem.sentence(word_count: 5),
-    summary: Faker::Lorem.paragraph(sentence_count: 2),
-    content: Faker::Lorem.paragraphs(number: 3).join("\n\n"),
-    sources: generate_fake_apa_citation,
-    category: Category.order('RANDOM()').first,
-    image: Faker::LoremFlickr.image,
-    sentiment_score: rand(-1.0..1.0).round(2)
-  )
+feeds = [
+  {
+    url: "https://rss.politico.com/politics-news.xml",
+    name: "Politico Politics",
+    category_id: Category.find_by(name: 'Politics').id
+  },
+  {
+    url: "https://feeds.npr.org/1014/rss.xml",
+    content_class: 'story',
+    name: "NPR Politics",
+    category_id: Category.find_by(name: 'Politics').id
+  },
+  {
+    url: "https://www.cnbc.com/id/10000664/device/rss/rss.html",
+    content_class: 'group',
+    name: "CNBC Finance",
+    category_id: Category.find_by(name: 'Finance').id
+  }
+]
+
+feeds.each do |feed|
+  Feed.create(feed)
 end
+
+5.times do
+  # feed_entry = FeedEntry.create!(
+  #   feed: Feed.first,
+  #   guid: Faker::Internet.uuid,
+  #   url: Faker::Internet.url,
+  #   title: Faker::Lorem.sentence(word_count: 5),
+  #   summary: Faker::Lorem.paragraph(sentence_count: 2),
+  #   content: Faker::Lorem.paragraphs(number: 3).join("\n\n"),
+  #   category: Category.order('RANDOM()').first,
+  #   image: Faker::LoremFlickr.image,
+  #   sentiment_score: rand(-1.0..1.0).round(2)
+  # )
+
+  puts "Starting"
+
+  # Article.create!(
+  #   feed_entry: feed_entry,
+  #   title: Faker::Lorem.sentence(word_count: 5),
+  #   summary: Faker::Lorem.paragraph(sentence_count: 2),
+  #   content: Faker::Lorem.paragraphs(number: 3).join("\n\n"),
+  #   sources: generate_fake_apa_citation,
+  #   category: Category.order('RANDOM()').first,
+  #   image: Faker::LoremFlickr.image,
+  #   sentiment_score: rand(-1.0..1.0).round(2)
+  # )
+end
+
 
 
 # AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?

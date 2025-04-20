@@ -27,6 +27,13 @@ gem "sassc"
 
 gem "faker"
 
+gem "feedjira"
+gem "httparty"
+gem "sidekiq"
+gem "sidekiq-scheduler"
+gem "sidekiq-unique-jobs"
+gem "sentimental"
+
 # DOCS: https://rubygems.org/gems/git-version-bump
 gem "git-version-bump", "~> 0.19.1"
 

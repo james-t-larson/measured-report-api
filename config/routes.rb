@@ -1,10 +1,11 @@
 Rails.application.routes.draw do
-  mount Rswag::Ui::Engine => "/api-docs" unless Rails.env.production?
-  mount Rswag::Api::Engine => "/api-docs" unless Rails.env.production?
   root to: redirect("/api/v1/articles")
-  ActiveAdmin.routes(self)
-  devise_for :admin_users, ActiveAdmin::Devise.config
+  require "sidekiq/web"
+  mount Sidekiq::Web => "/sidekiq"
+
   # THE BELOW SHOULD WORK FOR CREATING SCOPED DEVISE/ActiveAdmin routes
+  # ActiveAdmin.routes(self)
+  # devise_for :admin_users, ActiveAdmin::Devise.config
   # devise_for :users, controllers: {
   #   sessions: 'users/sessions',
   #   registrations: 'users/registrations',

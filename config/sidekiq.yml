@@ -1,0 +1,3 @@
+:unique_args_enabled: true
+:unique_prefix: "uniquejobs"
+:log_duplicate_payload: true

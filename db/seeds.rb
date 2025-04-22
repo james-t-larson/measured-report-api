@@ -25,17 +25,17 @@ def generate_fake_apa_citation
 end
 
 categories = [
-  { name: 'Technology', slug: 'technology', position: 1 },
-  { name: 'Finance', slug: 'finance', position: 2 },
-  { name: 'Politics', slug: 'politics', position: 3 },
-  { name: 'Sports', slug: 'sports', position: 4 },
-  { name: 'Entertainment', slug: 'entertainment', position: 5 }
+  { name: 'Politics', slug: 'politics' },
+  { name: 'World', slug: 'world' },
+  { name: 'Technology', slug: 'technology' },
+  { name: 'Finance', slug: 'finance' },
+  { name: 'Sports', slug: 'sports' }
 ]
 
-categories.each do |category|
+categories.each_with_index do |category, index|
   Category.find_or_create_by!(slug: category[:slug]) do |c|
     c.name = category[:name]
-    c.position = category[:position]
+    c.position = index
   end
 end
 
@@ -47,50 +47,39 @@ feeds = [
   },
   {
     url: "https://feeds.npr.org/1014/rss.xml",
-    content_class: 'story',
+    content_selector: '.story',
     name: "NPR Politics",
     category_id: Category.find_by(name: 'Politics').id
   },
   {
+    url: "https://feeds.bbci.co.uk/news/world/rss.xml",
+    content_selector: "article",
+    name: "BBC World",
+    category_id: Category.find_by(name: 'World').id
+  },
+  {
+    url: "https://www.theverge.com/rss/index.xml",
+    content_selector: 'article',
+    name: "The Verge Technology",
+    category_id: Category.find_by(name: 'Technology').id
+  },
+  {
     url: "https://www.cnbc.com/id/10000664/device/rss/rss.html",
-    content_class: 'group',
+    content_selector: '.group',
     name: "CNBC Finance",
     category_id: Category.find_by(name: 'Finance').id
+  },
+  {
+    url: "https://www.espn.com/espn/rss/news",
+    content_selector: '.container',
+    name: "ESPN Sports",
+    category_id: Category.find_by(name: 'Sports').id
   }
 ]
 
 feeds.each do |feed|
   Feed.create(feed)
 end
-
-5.times do
-  # feed_entry = FeedEntry.create!(
-  #   feed: Feed.first,
-  #   guid: Faker::Internet.uuid,
-  #   url: Faker::Internet.url,
-  #   title: Faker::Lorem.sentence(word_count: 5),
-  #   summary: Faker::Lorem.paragraph(sentence_count: 2),
-  #   content: Faker::Lorem.paragraphs(number: 3).join("\n\n"),
-  #   category: Category.order('RANDOM()').first,
-  #   image: Faker::LoremFlickr.image,
-  #   sentiment_score: rand(-1.0..1.0).round(2)
-  # )
-
-  puts "Starting"
-
-  # Article.create!(
-  #   feed_entry: feed_entry,
-  #   title: Faker::Lorem.sentence(word_count: 5),
-  #   summary: Faker::Lorem.paragraph(sentence_count: 2),
-  #   content: Faker::Lorem.paragraphs(number: 3).join("\n\n"),
-  #   sources: generate_fake_apa_citation,
-  #   category: Category.order('RANDOM()').first,
-  #   image: Faker::LoremFlickr.image,
-  #   sentiment_score: rand(-1.0..1.0).round(2)
-  # )
-end
-
-
 
 # AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
 

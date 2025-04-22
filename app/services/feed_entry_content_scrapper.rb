@@ -2,9 +2,9 @@ require "httparty"
 require "nokogiri"
 
 class FeedEntryContentScrapper
-  def initialize(url, css_class)
+  def initialize(url, selector)
     @url = url
-    @css_class = css_class
+    @selector = selector
   end
 
   def call
@@ -32,7 +32,7 @@ class FeedEntryContentScrapper
     # TODO: Add image extraction
     if response.success?
       document = Nokogiri::HTML(response.body)
-      elements = document.css(".#{@css_class}")
+      elements = document.css("#{@selector}")
 
       elements.map(&:text).map(&:strip)
     else

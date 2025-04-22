@@ -3,9 +3,6 @@ class GenerateArticleWorker
 
   sidekiq_options queue: :default, retry: 3
 
-  MAX_SENTIMENT_SCORE = Article::SENTIMENT_RANGE.end
-  MIN_SENTIMENT_SCORE = Article::SENTIMENT_RANGE.begin
-
   class HighSentimentError < StandardError; end
 
   def perform
@@ -21,25 +18,34 @@ class GenerateArticleWorker
       return Rails.logger.info("[GenerateArticleWorker] No articles to generate.") if feed_entry.nil?
       return Rails.logger.info("[GenerateArticleWorker] Skipping, Article Generated for Entry #{feed_entry.id}: #{feed_entry.title}.") if Article.exists?(feed_entry_id: feed_entry.id)
 
-      feed_entry.present_to_the_fates!
       Rails.logger.info("[GenerateArticleWorker] Generating Article for Feed Entry #{feed_entry.id}: #{feed_entry.title}.")
 
-      sleep(rand(10..20))
+      generator = ArticleGenerator.new
+      generated = generator.generate_article(
+        title: feed_entry.title,
+        summary: feed_entry.summary,
+        content: feed_entry.content,
+      )[:article]
 
-      content = Faker::Lorem.paragraphs(number: 3).join("\n\n")
+      feed_entry.present_to_the_fates!
+      Rails.logger.info("[GenerateArticleWorker] Generated Article for Feed Entry #{generated}.")
+      content = generated[:content]
       sentiment_score = SentimentAnalyzer.instance.score(content)
-      if sentiment_score > Article::SENTIMENT_RANGE.end
+      unless Article::SENTIMENT_RANGE.cover?(sentiment_score)
+        feed_entry.send_to_the_river_stix!
         raise HighSentimentError, "Sentiment too high (#{sentiment_score})"
       end
 
+      # TODO: Send to purgatory when retries failed for review.
+
       Article.create!(
         feed_entry: feed_entry,
-        title: Faker::Lorem.sentence(word_count: 5),
-        summary: Faker::Lorem.paragraph(sentence_count: 2),
+        title: generated[:title],
+        summary: generated[:summary],
         content: content,
-        sources: Faker::Internet.url,
+        sources: feed_entry.url,
         category: feed_entry.category,
-        image: Faker::LoremFlickr.image,
+        image: feed_entry.image,
         sentiment_score: sentiment_score,
       )
 

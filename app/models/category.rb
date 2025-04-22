@@ -1,5 +1,6 @@
 class Category < ApplicationRecord
   has_many :articles, dependent: :destroy
+  has_many :feed_entries, dependent: :destroy
 
   validates :slug, uniqueness: true
   validates :name, presence: true, length: { maximum: 255 }

@@ -32,6 +32,10 @@ class FeedEntry < ApplicationRecord
     soul_has_fallen!
   end
 
+  def send_to_the_river_stix!
+    soul_is_unjudged!
+  end
+
   def ascend!
     soul_has_ascended!
   end

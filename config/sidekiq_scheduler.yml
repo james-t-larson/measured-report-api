@@ -1,5 +1,5 @@
 injest_articles_worker:
-  every: ["10s"]
+  every: ['15m', first_in: '0s']
   class: "InjestArticlesWorker"
   queue: default
-  description: "Ingests articles from a single RSS feed every 5 minutes"
+  description: "Ingests articles from a single RSS feed every 15 minutes"

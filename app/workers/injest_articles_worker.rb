@@ -1,4 +1,21 @@
-# TODO, rename to InjestEntriesWorker, move to jobs
+# TODO: Change to news outlet theme
+# - Potential pipeline
+#   - Journalist Collects Story Ideas/Leads (Feed Entries)
+#   - Journalist creates a pitch (Pulls out entities), and relates them to the story
+#   - Editor checks if story has not aleady been writen (Deduplication)
+#     - Plagerism checkers and entity similarity might help here
+#   - Editor determines timeliness, novelty, and relevance
+#     - Will require social media scrapping, based on entities mentioned
+#   - Reporter Writes arficles (LLM Generates Content)
+#   - Article is sent to Standard Editors Team
+#     - Fact Check Ombudsmen performs the same steps as above
+#     - Sentiment Ombudsmen approves or rejects (Sentiment Analysis), potnetially sends back to Journalist
+#   - Article is sent to Legal Department for complaiance and risk assesment
+#     - Plagerism Ombudsmen checks original content against Journalist's article, approves/rejects
+#   - Once all checks have passed, the story is sent to the Editor-in-Chief to publish the aricle (Marked as published and publish_at time is set)
+#   - After this step, articles are marketed and corrections are published (daily review for corrections worker is needed)
+#
+
 class InjestArticlesWorker
   include Sidekiq::Worker
   sidekiq_options queue: :default
@@ -6,27 +23,41 @@ class InjestArticlesWorker
   REDIS_FEED_CURSOR_KEY = "injest_articles_worker:current_feed"
 
   def perform
-    feed = current_feed
+    feed = next_feed
     Rails.logger.info "[InjestArticlesWorker] Fetching feed from #{feed.url}"
 
-    response = HTTParty.get(feed.url)
-    entries = Feedjira.parse(response.body).entries
+    response = HTTParty.get(feed.url, headers: { "Accept" => "application/rss+xml" })
+    Rails.logger.debug "[InjestArticlesWorker] HTTP response status: #{response.code}"
 
+    entries = Feedjira.parse(response.body).entries
     new_articles_count = 0
 
     entries.each do |entry|
-      cache_key = "feed_entry:#{entry.entry_id}"
+      cache_key = "feed_entry:#{feed.name}:#{entry.entry_id}"
 
       next if Rails.cache.exist?(cache_key)
+      Rails.logger.debug "[InjestArticlesWorker] Processing entry: #{entry.title}"
 
       content = entry.content
-      if entry.url.present? && feed.content_class.present?
+      if entry.url.present? && feed.content_selector.present?
         Rails.logger.info "[InjestArticlesWorker] Scraping content for: #{entry.url}"
-        content_chunks = FeedEntryContentScrapper.new(entry.url, feed.content_class).call
-        content = content_chunks.join("\n") if content_chunks.present?
+        content_chunks = FeedEntryContentScrapper.new(entry.url, feed.content_selector).call
+        if content_chunks.present?
+          content = content_chunks.join("\n")
+        else
+          Rails.logger.warn "[InjestArticlesWorker] Scraping returned no content for URL: #{entry.url}"
+        end
       end
 
-      next if content.blank?
+      if content.blank?
+        Rails.logger.warn "[InjestArticlesWorker] Skipping entry due to blank content, Entry: #{entry.url} #{entry.title}"
+        # NOTE: Some RSS feeds return links to videos, so not all will be used. Might create adapter for transscripts if they exist
+        # NOTE: Might create a feed entry and send directly to underworld for proper reporting on which ones fail
+        # TODO: Create an alert that send all skiped entries to track errors. Might be able to use rails-admin instead
+        Rails.cache.write(cache_key, true, expires_in: 24.hours)
+        next
+      end
+
       processed_entry = {
         title:        entry.title,
         url:          entry.url,
@@ -48,8 +79,8 @@ class InjestArticlesWorker
     end
 
     if new_articles_count == 0
-      Rails.logger.info "[InjestArticlesWorker] No new articles were found."
-    else
+      Rails.logger.info "[InjestArticlesWorker] No new articles were found for current feed: #{current_feed.name}"
+    elsif current_feed == Feed.last
       Rails.logger.info "[InjestArticlesWorker] Enqueuing GenerateArticleWorker to run after ingestion."
       GenerateArticleWorker.perform_async
     end
@@ -57,13 +88,17 @@ class InjestArticlesWorker
     Rails.logger.error "[InjestArticlesWorker] Failed: #{e.message}"
   end
 
-    private
+  private
 
-  def current_feed
-    last_id = Rails.cache.read(REDIS_FEED_CURSOR_KEY).to_i
-    current_feed = Feed.where("id > ?", last_id).first || Feed.first
+  def next_feed
+    @previous_feed = Feed.find_by(name: Rails.cache.read(REDIS_FEED_CURSOR_KEY)) || Feed.last
+    @next_feed = Feed.find_by(id: @previous_feed.id + 1) || Feed.first
 
-    Rails.cache.write(REDIS_FEED_CURSOR_KEY, current_feed.id)
-    current_feed
+    Rails.cache.write(REDIS_FEED_CURSOR_KEY, @next_feed.name)
+    @next_feed
+  end
+
+  def current_feed(increase_count = false)
+    Feed.find_by(name: Rails.cache.read(REDIS_FEED_CURSOR_KEY))
   end
 end

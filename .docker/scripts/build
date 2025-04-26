@@ -50,7 +50,7 @@ function optionally_create_tag() {
 
 if [[ -z "$BUILD_ENV" ]]; then
   echo "Select environment:"
-  select choice in "development" "production"; do
+  select choice in "development" "staging" "production"; do
     case $choice in
     development)
       BUILD_ENV="development"
@@ -58,12 +58,12 @@ if [[ -z "$BUILD_ENV" ]]; then
       BUILD_ID="development-$LATEST_COMMIT_DATE"
       break
       ;;
-    production)
-      BUILD_ENV="production"
-      BUILD_ID="$BUILD_ENV-$BUILD_ID"
-
+    staging | production)
       optionally_create_tag
       choose_tag
+
+      BUILD_ENV="production"
+      BUILD_ID="$BUILD_ENV-$TAG"
 
       git checkout "$TAG"
 

@@ -3,7 +3,7 @@
 # TODO: cd to root to avoid context issues
 
 echo "Select an environment:"
-select env in "development" "production"; do
+select env in "development" "staging" "production"; do
   if [[ -n "$env" ]]; then
     BUILD_ENV="$env"
     break

@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
   def authenticate
     # during development, this will allow developers to work without static ip addresses
     # there is no need for rolling api keys in this case.
-    if api_key != ENV["API_KEY"]
+    if ENV["API_KEY"] == params[:api_key]
       render json: { error: "Unauthorized" }, status: :unauthorized
     end
   end

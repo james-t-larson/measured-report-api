@@ -16,6 +16,21 @@ services:
     networks:
       - network
 
+  sidekiq:
+    build:
+      context: ../../.
+    image: api:${TAG}
+    container_name: ${CONTAINER_ENV}-sidekiq
+    restart: always
+    command: bundle exec sidekiq
+    env_file:
+      - ../env/${CONTAINER_ENV}.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - network
+
   db:
     image: postgres
     container_name: ${CONTAINER_ENV}-db

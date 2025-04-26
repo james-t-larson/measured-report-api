@@ -35,7 +35,7 @@ categories = [
 categories.each_with_index do |category, index|
   Category.find_or_create_by!(slug: category[:slug]) do |c|
     c.name = category[:name]
-    c.position = index
+    c.position = index + 1
   end
 end
 

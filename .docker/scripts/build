@@ -2,15 +2,80 @@
 
 # TODO: cd to root to avoid context issues
 
-if [ $# -eq 0 ]; then
-  echo "Usage: $0 <tag>"
-  exit 1
+BUILD_ID=""
+BUILD_ENV=""
+TAG=""
+
+function choose_tag() {
+  echo "Select a tag:"
+  tags=$(git for-each-ref --sort=-creatordate --format '%(creatordate:short) - %(refname:short)' refs/tags)
+  tag_array=()
+
+  while read -r line; do
+    tag_array+=("$line")
+  done <<<"$tags"
+
+  select tag_choice in "${tag_array[@]}"; do
+    if [[ -n "$tag_choice" ]]; then
+      TAG=$(echo "$tag_choice" | awk '{print $3}')
+      break
+    else
+      echo "Invalid selection. Please try again."
+    fi
+  done
+}
+
+function optionally_create_tag() {
+  local response
+
+  read -p "Do you want to create a new tag? (y/n) " -n 1 -r response
+  echo
+
+  if [[ "${response}" == "y" ]]; then
+    echo
+    echo "Select the type of version bump:"
+    select version_type in "major" "minor" "patch"; do
+      if [[ -n "$version_type" ]]; then
+        echo "Performing a $version_type version bump..."
+        git version-bump "$version_type"
+        break
+      else
+        echo "Invalid selection. Try again?"
+      fi
+    done
+  else
+    echo "Skipping tag creation."
+  fi
+}
+
+if [[ -z "$BUILD_ENV" ]]; then
+  echo "Select environment:"
+  select choice in "development" "production"; do
+    case $choice in
+    development)
+      BUILD_ENV="development"
+      LATEST_COMMIT_DATE=$(git show -s --format=%cI | cut -d'T' -f1)
+      BUILD_ID="development-$LATEST_COMMIT_DATE"
+      break
+      ;;
+    production)
+      BUILD_ENV="production"
+      BUILD_ID="$BUILD_ENV-$BUILD_ID"
+
+      optionally_create_tag
+      choose_tag
+
+      git checkout "$TAG"
+
+      break
+      ;;
+    *)
+      echo "Please choose 1 or 2."
+      ;;
+    esac
+  done
 fi
 
-TAG=$2
+export BUILD_ID="$BUILD_ID"
 
-export TAG=$TAG
-
-git checkout tags/$TAG
-
-docker build -t api:$TAG .
+docker build -t "api:$BUILD_ID" .

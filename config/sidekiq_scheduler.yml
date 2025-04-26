@@ -3,3 +3,7 @@ injest_articles_worker:
   class: "InjestArticlesWorker"
   queue: default
   description: "Ingests articles from a single RSS feed every 15 minutes"
+generate_article_worker:
+  class: "GenerateArticleWorker"
+  queue: default
+  description: "Generates articles based on available feed entries"

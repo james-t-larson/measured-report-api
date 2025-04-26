@@ -11,6 +11,8 @@ class GenerateArticleWorker
     article_generation_locked = Rails.cache.exist?(lock_key)
     return if article_generation_locked
 
+    @error = false
+
     begin
       Rails.cache.write(lock_key, true, expires_in: 24.hours)
       feed_entry = FeedEntry.fresh_souls.first
@@ -28,7 +30,7 @@ class GenerateArticleWorker
       )[:article]
 
       feed_entry.present_to_the_fates!
-      Rails.logger.info("[GenerateArticleWorker] Generated Article for Feed Entry #{generated}.")
+      Rails.logger.info("[GenerateArticleWorker] Generated Article for Feed Entry #{feed_entry.id}: #{generated}.")
       content = generated[:content]
       sentiment_score = SentimentAnalyzer.instance.score(content)
       unless Article::SENTIMENT_RANGE.cover?(sentiment_score)
@@ -51,12 +53,20 @@ class GenerateArticleWorker
 
       feed_entry.ascend!
       Rails.logger.info "[GenerateArticleWorker] Generated Article for Feed Entry #{feed_entry.id}: #{feed_entry.title} Complete"
+    rescue HighSentimentError => e
+      @error = false
+      raise e
+    rescue ArticleGenerator::MissingAPIKeyError => e
+      Rails.logger.warn "[GenerateArticleWorker] Skipping article generation: #{e.message}"
+      @error = true
+      raise e
     rescue => e
       Rails.logger.error "[GenerateArticleWorker] Error: #{e.message}"
+      @error = true
       raise e
     ensure
       Rails.cache.delete(lock_key)
-      if FeedEntry.fresh_souls.exists?
+      if FeedEntry.fresh_souls.exists? && !@error
         GenerateArticleWorker.perform_async
       else
        Rails.logger.info "[GenerateArticleWorker] Generation for last batch of articles complete"

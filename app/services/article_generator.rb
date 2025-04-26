@@ -4,9 +4,14 @@ require "json"
 
 class ArticleGenerator
   include HTTParty
-  base_uri "https://api.openai.com"
+
+  @@api_key = ENV["LLM_API_KEY"]
+  @@system_instructions = nil
+
+  base_uri ENV.fetch("LLM_BASE_URI", "https://api.openai.com")
 
   class ResponseValidationError < StandardError; end
+  class MissingAPIKeyError < StandardError; end
 
   COMPLETIONS_ROUTE = "/v1/chat/completions"
 
@@ -41,15 +46,24 @@ class ArticleGenerator
     }
   }
 
+  def self.api_key
+    @@api_key
+  end
+
+  def self.api_key=(value)
+    @@api_key = value
+  end
+
   def initialize(api_key = nil)
-    @api_key = api_key || Rails.application.credentials.dig(:openai, :api_key)
+    @@api_key = api_key || ENV["LLM_API_KEY"]
+    raise_missing_key if @@api_key.nil?
   end
 
   def generate_article(title:, summary:, content:)
     response = self.class.post(
       COMPLETIONS_ROUTE,
       headers: {
-        "Authorization" => "Bearer #{@api_key}",
+        "Authorization" => "Bearer #{@@api_key}",
         "Content-Type" => "application/json"
       },
       body: request_payload(title, summary, content).to_json
@@ -120,5 +134,11 @@ class ArticleGenerator
     data
   rescue JSON::Schema::ValidationError
     false
+  end
+
+  private
+
+  def raise_missing_key
+    raise MissingAPIKeyError, "API key is missing. Provide it as an argument or set LLM_API_KEY environment variable."
   end
 end

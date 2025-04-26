@@ -2,29 +2,31 @@ services:
   api:
     build:
       context: ../../.
-    image: api:${TAG}
-    container_name: ${CONTAINER_ENV}-api
+    image: api:${BUILD_ID}
+    container_name: ${BUILD_ENV}-api
     restart: always
     env_file:
-      - ../env/${CONTAINER_ENV}.env
+      - ../env/${BUILD_ENV}.env
     ports:
       - "${API_PORT}:${API_PORT}"
     depends_on:
       - db
       - redis
-    # TODO: Add the correct volumes here to be able to determine which tag/env the volume belongs to
+    volumes:
+      - .:/app
+      - /app/vendor/bundle
     networks:
       - network
 
   sidekiq:
     build:
       context: ../../.
-    image: api:${TAG}
-    container_name: ${CONTAINER_ENV}-sidekiq
+    image: api:${BUILD_ID}
+    container_name: ${BUILD_ENV}-sidekiq
     restart: always
     command: bundle exec sidekiq
     env_file:
-      - ../env/${CONTAINER_ENV}.env
+      - ../env/${BUILD_ENV}.env
     depends_on:
       - db
       - redis
@@ -33,9 +35,9 @@ services:
 
   db:
     image: postgres
-    container_name: ${CONTAINER_ENV}-db
+    container_name: ${BUILD_ENV}-db
     env_file:
-      - ../env/${CONTAINER_ENV}.env
+      - ../env/${BUILD_ENV}.env
     ports:
       - 5432
     healthcheck:
@@ -44,17 +46,17 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - ${CONTAINER_ENV}-db-volume:/var/lib/postgresql/data
+      - ${BUILD_ENV}-db-volume:/var/lib/postgresql/data
     networks:
       - network
 
   redis:
     image: redis
-    container_name: ${CONTAINER_ENV}-redis
+    container_name: ${BUILD_ENV}-redis
     ports:
       - 6379
     volumes:
-      - ${CONTAINER_ENV}-redis-volume:/var/lib/redis/data
+      - ${BUILD_ENV}-redis-volume:/var/lib/redis/data
     networks:
       - network
     healthcheck:
@@ -65,24 +67,24 @@ services:
 
 # t TODO: This should be done in a less repetative way
 volumes:
-  develop-db-volume:
-    name: ${CONTAINER_ENV}-db-volume
+  development-db-volume:
+    name: ${BUILD_ENV}-db-volume
   static-db-volume:
-    name: ${CONTAINER_ENV}-db-volume
+    name: ${BUILD_ENV}-db-volume
   staging-db-volume:
-    name: ${CONTAINER_ENV}-db-volume
+    name: ${BUILD_ENV}-db-volume
   production-db-volume:
-    name: ${CONTAINER_ENV}-db-volume
-  develop-redis-volume:
-    name: ${CONTAINER_ENV}-redis-volume
+    name: ${BUILD_ENV}-db-volume
+  development-redis-volume:
+    name: ${BUILD_ENV}-redis-volume
   static-redis-volume:
-    name: ${CONTAINER_ENV}-redis-volume
+    name: ${BUILD_ENV}-redis-volume
   staging-redis-volume:
-    name: ${CONTAINER_ENV}-redis-volume
+    name: ${BUILD_ENV}-redis-volume
   production-redis-volume:
-    name: ${CONTAINER_ENV}-redis-volume
+    name: ${BUILD_ENV}-redis-volume
 
 networks:
   network:
-    name: ${CONTAINER_ENV}-network
+    name: ${BUILD_ENV}-network
     driver: bridge

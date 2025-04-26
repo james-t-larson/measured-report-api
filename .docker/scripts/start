@@ -2,15 +2,39 @@
 
 # TODO: cd to root to avoid context issues
 
-if [ $# -eq 0 ]; then
-  echo "Usage: $0 <tag>"
+echo "Select an environment:"
+select env in "development" "production"; do
+  if [[ -n "$env" ]]; then
+    BUILD_ENV="$env"
+    break
+  else
+    echo "Invalid selection. Try again?"
+  fi
+done
+
+image_list=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>:<none>")
+if [[ -z "$image_list" ]]; then
+  echo "No local Docker images found. Please run the build script first."
   exit 1
+else
+  image_array=()
+
+  while read -r line; do
+    image_array+=("$line")
+  done <<<"$image_list"
+
+  echo "Select an image:"
+  select image_choice in "${image_array[@]}"; do
+    if [[ -n "$image_choice" ]]; then
+      BUILD_ID=$(echo "$image_choice" | awk -F ":" '{print $2}')
+      break
+    else
+      echo "Invalid selection. Please choose a number from the list."
+    fi
+  done
 fi
 
-CONTAINER_ENV=$1
-TAG=$2
+export BUILD_ID=$BUILD_ID
+export BUILD_ENV=$BUILD_ENV
 
-export TAG=$TAG
-export CONTAINER_ENV=$CONTAINER_ENV
-
-docker-compose --env-file "./.docker/env/${CONTAINER_ENV}.env" -f "./.docker/compose/docker-compose.yml" -p "${CONTAINER_ENV}" up -d
+docker-compose --env-file "./.docker/env/${BUILD_ENV}.env" -f "./.docker/compose/docker-compose.yml" -p "${BUILD_ENV}" up -d

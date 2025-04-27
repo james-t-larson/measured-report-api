@@ -1,7 +1,7 @@
 class GenerateArticleWorker
   include Sidekiq::Worker
 
-  sidekiq_options queue: :default, retry: 3
+  sidekiq_options queue: :default, retry: 3, dead: false
 
   class HighSentimentError < StandardError; end
 
@@ -54,7 +54,7 @@ class GenerateArticleWorker
       feed_entry.ascend!
       Rails.logger.info "[GenerateArticleWorker] Generated Article for Feed Entry #{feed_entry.id}: #{feed_entry.title} Complete"
     rescue HighSentimentError => e
-      @error = false
+      @error = true
       raise e
     rescue ArticleGenerator::MissingAPIKeyError => e
       Rails.logger.warn "[GenerateArticleWorker] Skipping article generation: #{e.message}"

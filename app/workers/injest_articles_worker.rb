@@ -46,6 +46,7 @@ class InjestArticlesWorker
           content = content_chunks.join("\n")
         else
           Rails.logger.warn "[InjestArticlesWorker] Scraping returned no content for URL: #{entry.url}"
+          Rails.cache.write(cache_key, true, expires_in: 24.hours)
         end
       end
 
@@ -80,7 +81,7 @@ class InjestArticlesWorker
 
     if new_articles_count == 0
       Rails.logger.info "[InjestArticlesWorker] No new articles were found for current feed: #{current_feed.name}"
-    elsif current_feed == Feed.last
+    else
       Rails.logger.info "[InjestArticlesWorker] Enqueuing GenerateArticleWorker to run after ingestion."
       GenerateArticleWorker.perform_async
     end

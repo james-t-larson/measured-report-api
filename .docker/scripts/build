@@ -78,4 +78,4 @@ fi
 
 export BUILD_ID="$BUILD_ID"
 
-docker build -t "api:$BUILD_ID" .
+docker build --no-cache -t "api:$BUILD_ID" .

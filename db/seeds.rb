@@ -24,6 +24,9 @@ def generate_fake_apa_citation
   "#{author} (#{date}). #{title}. #{city}: #{publisher}."
 end
 
+# TODO: Certain categories do not need sentimenlity checked
+# I imagine that this is the case for other verfications
+# -- Create a validations required table to skip/require validations
 categories = [
   { name: 'Politics', slug: 'politics' },
   { name: 'World', slug: 'world' },

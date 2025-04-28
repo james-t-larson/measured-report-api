@@ -30,7 +30,6 @@ class InjestArticlesWorker
     Rails.logger.debug "[InjestArticlesWorker] HTTP response status: #{response.code}"
 
     entries = Feedjira.parse(response.body).entries
-    new_articles_count = 0
 
     entries.each do |entry|
       cache_key = "feed_entry:#{feed.name}:#{entry.entry_id}"
@@ -71,7 +70,6 @@ class InjestArticlesWorker
 
       internal_entry = FeedEntry.find_or_initialize_by(feed_id: feed.id, category_id: feed.category_id, guid: entry.entry_id)
       if internal_entry.new_record?
-        new_articles_count += 1
         internal_entry.assign_attributes(processed_entry)
         internal_entry.save!
       end
@@ -79,12 +77,7 @@ class InjestArticlesWorker
       Rails.cache.write(cache_key, true, expires_in: 24.hours)
     end
 
-    if new_articles_count == 0
-      Rails.logger.info "[InjestArticlesWorker] No new articles were found for current feed: #{current_feed.name}"
-    else
-      Rails.logger.info "[InjestArticlesWorker] Enqueuing GenerateArticleWorker to run after ingestion."
-      GenerateArticleWorker.perform_async
-    end
+    GenerateArticleWorker.process_entries
   rescue => e
     Rails.logger.error "[InjestArticlesWorker] Failed: #{e.message}"
   end

@@ -13,14 +13,25 @@ begin
         Sidekiq::Scheduler.reload_schedule!
       end
     end
-  end
+    config.death_handlers << ->(job, ex) do
+      Rails.logger.warn("Job #{job['class']} with args #{job['args']} failed after retries: #{ex.message}")
+    end
 
-  SidekiqUniqueJobs.configure do |unique_config|
-    unique_config.logger = Rails.logger
+    config.client_middleware do |chain|
+      chain.add SidekiqUniqueJobs::Middleware::Client
+    end
+
+    config.server_middleware do |chain|
+      chain.add SidekiqUniqueJobs::Middleware::Server
+    end
   end
 
   Sidekiq.configure_client do |config|
     config.redis = { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0") }
+
+    config.client_middleware do |chain|
+      chain.add SidekiqUniqueJobs::Middleware::Client
+    end
   end
 
   puts "[Sidekiq Init] Initializer loaded!"

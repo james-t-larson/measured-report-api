@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
   root to: redirect("/api/v1/articles")
-  require "sidekiq/web"
   require "sidekiq-scheduler/web"
   mount Sidekiq::Web => "/sidekiq"
 

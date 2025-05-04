@@ -8,9 +8,10 @@ class Api::V1::ArticlesController < Api::BaseController
   def index
     @articles = Article.all
     if params[:category_id].nil?
+      @articles = @category.articles.order(created_at: :desc).limit(10)
       generic_render(data: @articles)
     else
-      @category = Category.find(params[:category_id])
+      @articles = @category.articles.order(created_at: :desc).limit(10)
       generic_render(data: @category.articles, category: @category.name)
     end
   end

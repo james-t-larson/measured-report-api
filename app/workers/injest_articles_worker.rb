@@ -1,11 +1,14 @@
 # TODO: Change to news outlet theme
 # - Potential pipeline
 #   - Journalist Collects Story Ideas/Leads (Feed Entries)
+#   - Editor determines timeliness, novelty, and relevance
+#     - Will require social media scrapping, based on entities mentioned
+#     - This is where we do find the social score of the article
+#     - There is a chance that the article will be published before peolple are talking about it
+#     - To mitigate this, I can either slow down the rate of publication, or start a perioodic job
 #   - Journalist creates a pitch (Pulls out entities), and relates them to the story
 #   - Editor checks if story has not aleady been writen (Deduplication)
 #     - Plagerism checkers and entity similarity might help here
-#   - Editor determines timeliness, novelty, and relevance
-#     - Will require social media scrapping, based on entities mentioned
 #   - Reporter Writes arficles (LLM Generates Content)
 #   - Article is sent to Standard Editors Team
 #     - Fact Check Ombudsmen performs the same steps as above

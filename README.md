@@ -40,14 +40,11 @@ Status: 200 OK
     "created_at":"2025-03-26T20:14:00Z",
     "updated_at":"2025-03-26T20:14:00Z",
     "content":"Full content of the article...",
-    "sources":"Source information",
-    "external_article_id":456,
-    "category_id":789,
+    "sources": https:original-source-link,
+    "category_id": 1,
     "image":"[https://example.com/image.jpg](https://example.com/image.jpg)",
     "sentiment_score":0.75,
-    "event_id":null,
     "location":"Port Coquitlam, BC, Canada",
-    "relevance":0.9
   }
 }
 ```
@@ -75,15 +72,21 @@ Status: 200 OK
    "message":"success",
    "data":[
       {
-         "id":1,
-         "name":"Technology"",
-         "slug":"technology""
+        "id": 1,
+        "slug": "politics",
+        "name": "Politics",
+        "position": 1,
+        "created_at": "2025-04-27T01:22:10.736Z",
+        "updated_at": "2025-04-27T01:22:10.736Z"
       },
       {
-         "id":2,
-         "name":"Science"",
-         "slug":"science""
-      }
+        "id": 2,
+        "slug": "world",
+        "name": "World",
+        "position": 2,
+        "created_at": "2025-04-27T01:22:10.753Z",
+        "updated_at": "2025-04-27T01:22:10.753Z"
+      },
    ]
 }
 ```
@@ -106,21 +109,32 @@ GET /categories/1/articles
 
 Status: 200 OK
 ```
-{
-   "message":"success",
-   "data":[
-      {
-         "id":123,
-         "title":"Latest Tech Trends",
-         ...rest of params outlined below
-      },
-      {
-         "id":124,
-         "title":"AI Advancements",
-         ...rest of params outlined below
-      }
-   ]
-}
+    {
+      "id": 1289,
+      "title": "Analysis of Spending ...",
+      "summary": "This article examines the impact...",
+      "content": "Recent adjustments in federal spending have had implications for communities nationwide...",
+      "sources": "https://www.npr.org/2025/05/05/1249236665/trumps-spending-cuts-are-hitting-trump-voters",
+      "category_id": 1,
+      "image": null,
+      "sentiment_score": 1.4375,
+      "created_at": "2025-05-05T23:38:48.667Z",
+      "updated_at": "2025-05-05T23:38:48.667Z",
+      "feed_entry_id": 1302
+    },
+    {
+      "id": 1274,
+      "title": "Former Palantir Employees Critique...",
+      "summary": "Thirteen former...",
+      "content": "Thirteen former employees from Palantir Technologies have expressed...",
+      "sources": "https://www.npr.org/2025/05/05/nx-s1-5387514/palantir-workers-letter-trump",
+      "category_id": 1,
+      "image": null,
+      "sentiment_score": -0.7397999999999998,
+      "created_at": "2025-05-05T22:08:56.838Z",
+      "updated_at": "2025-05-05T22:08:56.838Z",
+      "feed_entry_id": 1287
+    },
 ```
 ## Error Handling
 

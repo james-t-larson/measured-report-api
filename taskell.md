@@ -1,5 +1,9 @@
 ## Long-Term Goals
 
+- Add social score to make sure that we  aren't generating articles for content that people dont care about
+- Pass articles through a second ai that should work as an editor
+    > This is to just catch minor mistakes. Like ads being in the content. Remove dates that that are duplicated in the content (already present below the summary). This should also be used to make sure we don't end up with a bunch of /n. The original reporters might not be left in there either
+- Add reading length to pipeline, this is to ensure that we aren't getting podcasts as articles
 - Get reporting working (logs, and alerts)
     > a
     * [x] Get logs working
@@ -34,6 +38,8 @@
 ## To Do
 
 - Get client side authentication working
+- Categories a slug and a display name
+- Articles need an auto generated slug
 
 ## Doing
 

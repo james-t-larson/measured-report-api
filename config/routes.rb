@@ -23,7 +23,9 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      # devise_for :users
+      devise_for :users, skip: [ :registrations, :passwords ], controllers: {
+        sessions: "api/v1/users/sessions"
+      }
       resources :articles, only: [ :index, :show ]
       resources :categories, only: [ :index, :show ] do
         resources :articles, only: [ :index ], controller: "articles"

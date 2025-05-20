@@ -19,10 +19,6 @@ class Api::V1::ArticlesController < Api::BaseController
 
   private
 
-  # def article_params
-  #   params.permit(:category_id)
-  # end
-
   def set_article
     @article = Article.find(params[:id])
   end

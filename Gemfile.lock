@@ -247,6 +247,9 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.1.13)
+    rack-cors (3.0.0)
+      logger
+      rack (>= 3.0.14)
     rack-session (2.1.0)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -439,6 +442,7 @@ PLATFORMS
 
 DEPENDENCIES
   activeadmin
+  bcrypt (~> 3.1.7)
   bootsnap
   brakeman
   capybara
@@ -455,6 +459,7 @@ DEPENDENCIES
   jbuilder
   pg (~> 1.1)
   puma (>= 5.0)
+  rack-cors
   rails (~> 7.2.2, >= 7.2.2.1)
   redis (>= 4.0.1)
   rspec-rails

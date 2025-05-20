@@ -53,7 +53,6 @@
     * [x] Try to enable starting docker with a flag -production or -development to easily start either. This is to avoid long docker-compose commands
     * [x] Ensure that the image name is tagged for production
 - Get new domains with sub domains working
-    * [x] Buy a domain for the Measured Gazette
     * [x] Link to static ip
     * [x] Set nginx up
 - Implement Categories
@@ -166,7 +165,6 @@
 - BUG: Multiple articles are created with same article title, but different content
     * [x] The problem was caused by rate limiting and concurrancy issues as OpenAi takes forever, frequent retries happened
 - Add admin endpoint for to trigger article generation job
-- Rename everything to Measured Gazette
 - Update Articles Model
 - Fix categories endpoint
 - Create doc for getting db and redis setup for development

@@ -6,7 +6,7 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module MeasuredGazetteCapstone
+module MeasuredReportApi
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.2
@@ -19,6 +19,10 @@ module MeasuredGazetteCapstone
     config.cache_store = :redis_cache_store, {
       url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0")
     }
+
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore
+    config.api_only = true
 
     # Configuration for the application, engines, and railties goes here.
     #

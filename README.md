@@ -1,5 +1,5 @@
 
-# Measured Gazette REST API Specification
+# Measured Report REST API Specification
 
 ## Overview
 

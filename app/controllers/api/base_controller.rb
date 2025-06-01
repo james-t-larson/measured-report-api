@@ -1,7 +1,7 @@
 class Api::BaseController < ApplicationController
   before_action :enforce_json_format
   skip_before_action :verify_authenticity_token
-  before_action :authenticate_api_v1_user!
+  before_action :authenticate_api_v1_user!, if: -> { ENV["ENABLE_API_AUTH"] == "true" }
 
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
 

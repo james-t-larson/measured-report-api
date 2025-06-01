@@ -10,21 +10,21 @@ class Api::V1::Users::SessionsController < Api::BaseController
     # By default devise redirects to the registration page on auth failure.
     # This crashes the app if it's not defined.
     # This is disabled, but this also acts as a fallback
-    render json: { error: "Unauthorized access" }, status: :unauthorized
+    generic_render(error: "Unauthorized access", status: :unathorized)
   end
 
   def create
     user = User.find_by(email: params.dig(:user, :email))
-    unless user
-      return render json: { error: "Looks like you don't have an account. If you would like one, please contact support for an invite" }, status: :unauthorized
+    unless user.present?
+      return generic_render(message: "Looks like you don't have an account. If you would like one, please contact support for an invite", status: :unauthorized)
     end
 
     unless user.valid_password?(params.dig(:user, :password))
-      return render json: { error: "Wrong password" }, status: :unauthorized
+      return generic_render(message: "Wrong password", status: :unauthorized)
     end
 
     sign_in(session_scope, user)
-    render json: { message: "Logged in", user: user }, status: :ok
+    generic_render(data: user, message: "Sign in successful")
   end
 
   def destroy

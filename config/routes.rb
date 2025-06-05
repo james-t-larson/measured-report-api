@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       devise_for :users, skip: [ :registrations, :passwords ], controllers: {
         sessions: "api/v1/users/sessions"
       }
+      get "users/me", to: "users/sessions#show"
       resources :articles, only: [ :index, :show ]
       resources :categories, only: [ :index, :show ] do
         resources :articles, only: [ :index ], controller: "articles"

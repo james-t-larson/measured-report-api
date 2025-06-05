@@ -12,6 +12,11 @@
 Devise.setup do |config|
   config.navigational_formats = []
   config.sign_out_all_scopes = false
+  config.rememberable_options = {
+    domain: :all,
+    same_site: Rails.env.production? ? :none : :lax,
+    secure: Rails.env.production?
+  }
 
   config.warden do |manager|
     manager.failure_app = ->(env) {

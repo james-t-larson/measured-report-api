@@ -6,6 +6,10 @@ class Api::V1::Users::SessionsController < Api::BaseController
   respond_to :json
   skip_before_action :authenticate_api_v1_user!, only: [ :create ]
 
+  def show
+    generic_render(data: payload(current_api_v1_user))
+  end
+
   def new
     # By default devise redirects to the registration page on auth failure.
     # This crashes the app if it's not defined.
@@ -24,14 +28,20 @@ class Api::V1::Users::SessionsController < Api::BaseController
     end
 
     sign_in(session_scope, user)
-    generic_render(data: user, message: "Sign in successful")
+    generic_render(data: payload(user), message: "Sign in successful")
   end
 
   def destroy
     sign_out(session_scope)
+    generic_render(data: payload(current_api_v1_user))
   end
 
   protected
+
+  def payload(user)
+    user = user || {}
+    user.as_json.merge({ signed_in: user.present? })
+  end
 
   def session_scope
     :api_v1_user

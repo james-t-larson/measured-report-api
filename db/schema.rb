@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_19_220452) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -63,6 +63,16 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_19_220452) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "documents", force: :cascade do |t|
+    t.string "title"
+    t.string "link"
+    t.string "external_id"
+    t.bigint "meeting_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meeting_id"], name: "index_documents_on_meeting_id"
+  end
+
   create_table "feed_entries", force: :cascade do |t|
     t.bigint "feed_id", null: false
     t.bigint "category_id", null: false
@@ -92,6 +102,29 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_19_220452) do
     t.index ["category_id"], name: "index_feeds_on_category_id"
   end
 
+  create_table "meetings", force: :cascade do |t|
+    t.date "date"
+    t.string "title"
+    t.string "external_id"
+    t.string "location"
+    t.datetime "start_datetime"
+    t.datetime "end_datetime"
+    t.integer "document_pipeline", default: 0, null: false
+    t.integer "video_pipeline", default: 0, null: false
+    t.integer "transcript_pipeline", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "transcripts", force: :cascade do |t|
+    t.text "content"
+    t.string "external_id"
+    t.bigint "meeting_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meeting_id"], name: "index_transcripts_on_meeting_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -104,9 +137,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_19_220452) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "videos", force: :cascade do |t|
+    t.string "title"
+    t.string "link"
+    t.string "external_id"
+    t.bigint "meeting_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["meeting_id"], name: "index_videos_on_meeting_id"
+  end
+
   add_foreign_key "articles", "categories"
   add_foreign_key "articles", "feed_entries"
+  add_foreign_key "documents", "meetings"
   add_foreign_key "feed_entries", "categories"
   add_foreign_key "feed_entries", "feeds"
   add_foreign_key "feeds", "categories"
+  add_foreign_key "transcripts", "meetings"
+  add_foreign_key "videos", "meetings"
 end

@@ -1,5 +1,5 @@
 module MetroVanServices
-  class Ingest
+  class IngestContent
     def meeting(meeting_payload)
       attributes = {
         external_id:    meeting_payload["ID"],
@@ -22,14 +22,15 @@ module MetroVanServices
         .values
         .uniq
 
-      videos = external_ids.map do |id|
-        Video.new(
-          external_id: id,
-        )
-      end
+      return if external_ids.blank?
 
-      return if videos.blank?
-      meeting_record.videos << videos
+      ApplicationRecord.transaction do
+        external_ids.map do |id|
+          Video.find_or_create_by(external_id: id) do |video|
+            meeting_record.videos << video
+          end
+        end
+      end
     end
 
     def documents(meeting_record, meeting_payload)
@@ -38,15 +39,19 @@ module MetroVanServices
         .values
         .uniq
 
-      documents = links.map do |link|
-        Document.new(
-          title: link["Description"].to_s.strip.presence || "Unknown",
-          link:  link["Url"].to_s.strip
-        )
-      end
+      return if links.blank?
+      ApplicationRecord.transaction do
+        links.each do |item|
+          attrs = {
+            link: item["Url"],
+            title: item["Description"]
+          }
 
-      return if documents.blank?
-      meeting_record.documents << documents
+          Document.find_or_create_by(attrs) do |doc|
+            meeting_record.documents << doc
+          end
+        end
+      end
     end
   end
 end

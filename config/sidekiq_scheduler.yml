@@ -1,0 +1,5 @@
+metro_van_content_orchestrator:
+  every: ["30m", first_in: '0s']
+  class: "MetroVanWorkers::ContentOrchestrator"
+  queue: default
+  description: "Starts the MetroVan content orchestrator"

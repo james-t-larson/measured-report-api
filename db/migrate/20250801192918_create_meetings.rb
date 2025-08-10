@@ -7,12 +7,10 @@ class CreateMeetings < ActiveRecord::Migration[7.2]
       t.datetime :start_datetime, precision: 6, null: true
       t.datetime :end_datetime, precision: 6, null: true
 
-      t.integer :document_pipeline, default: 0, null: false
-      t.integer :video_pipeline, default: 0, null: false
-      t.integer :transcript_pipeline, default: 0, null: false
-
       t.timestamps
     end
+
+    add_index :meetings, :external_id, unique: true
   end
 
   def down

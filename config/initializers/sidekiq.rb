@@ -13,6 +13,7 @@ begin
         Sidekiq::Scheduler.reload_schedule!
       end
     end
+
     config.death_handlers << ->(job, ex) do
       Rails.logger.warn("Job #{job['class']} with args #{job['args']} failed after retries: #{ex.message}")
     end

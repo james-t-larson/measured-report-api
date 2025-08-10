@@ -3,11 +3,13 @@ class CreateTranscripts < ActiveRecord::Migration[7.2]
     create_table :transcripts do |t|
       t.text :content
       t.string :external_id
-      t.references :meeting, null: false, foreign_key: true
+      t.integer :pipeline, default: 0, null: false
       t.references :video, null: false, foreign_key: true
 
       t.timestamps
     end
+
+    add_index :transcripts, :external_id, unique: true
   end
 
   def down

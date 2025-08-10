@@ -1,5 +1,5 @@
 class Document < ApplicationRecord
-  belongs_to :meeting
+  belongs_to :meeting, inverse_of: :documents
 
   validates :link, presence: true
   validates :title, presence: true

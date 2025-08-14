@@ -113,7 +113,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
   end
 
   create_table "transcripts", force: :cascade do |t|
-    t.text "content"
+    t.text "vtt"
+    t.text "vtt_link"
     t.string "external_id"
     t.integer "pipeline", default: 0, null: false
     t.bigint "video_id", null: false

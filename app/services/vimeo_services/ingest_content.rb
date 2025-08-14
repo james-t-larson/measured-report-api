@@ -3,14 +3,28 @@ module VimeoServices
     def self.transcript(video_record)
       res  = VimeoServices::ApiClient.fetch_texttracks(video_record.external_id)
       data = Array(res&.dig("data"))
-      active = data.find { |t| t["active"] }
-      return unless active && active["id"].present?
+      active = data.find { |t| t.dig("active") }
+      id = active.dig("id").to_s
+      vtt_link = active.dig("link")
+      return if active.blank? || id.blank?
 
-      Transcript.find_or_create_by!(external_id: active["id"].to_s) do |t|
+      Transcript.find_or_create_by!(external_id: id) do |t|
         t.video   = video_record
+        t.vtt_link = vtt_link
       end
     rescue => e
-      Rails.logger.error("VimeoServices::IngestContent.transcripts ingest failed: #{e.message}")
+      Rails.logger.error("[VimeoServices::IngestContent] ingest transcropt failed: #{e.message}")
+      nil
+    end
+
+    # TODO: Finish injecting content for transcripts. This is simply to make citations easier
+    def self.vtt(transcript_record)
+      data = VimeoServices::ApiClient.fetch_vtt(transcript_record.vtt_link)
+      return unless data.present?
+
+      Transcript.update!(vtt: data)
+    rescue => e
+      Rails.logger.error("[VimeoServices::IngestContent] ingest transcript content failed: #{e.message}")
       nil
     end
 

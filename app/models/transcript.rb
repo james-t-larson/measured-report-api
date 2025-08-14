@@ -1,11 +1,9 @@
 class Transcript < ApplicationRecord
   PIPELINE_STATES = {
-    failed: -1,
-    pending: 0,
-    processing: 1,
-    skipped: 2,
-    retry: 3,
-    success: 4
+    no_vtt: -1,
+    needs_vtt: 0,
+    retry: 1,
+    complete: 2
   }.freeze
 
   enum pipeline: PIPELINE_STATES

@@ -19,19 +19,21 @@ module VimeoServices
       "X-Requested-With" => "XMLHttpRequest"
     }.freeze
 
+    def self.fetch_vtt(url)
+      fetch(url, json: false)
+    end
+
     def self.fetch_texttracks(video_id)
-      raise ArgumentError, "video id and texttrack id are required" if video_id.blank?
       fetch("/videos/#{video_id}/texttracks")
     end
 
     def self.fetch_video(id)
-      raise ArgumentError, "video id required" if id.blank?
       fetch("/videos/#{id}")
     end
 
-    def self.fetch(path, method: :get, query: nil, body: nil, headers: {})
+    def self.fetch(path, method: :get, query: nil, body: nil, headers: {}, json: true)
       sess = session_headers or raise "no session"
-      url  = "#{API_BASE_URI}#{path}"
+      url  = path.start_with?("http://", "https://") ? path : "#{API_BASE_URI}#{path}"
 
       opts = {
         headers: sess.merge(headers),
@@ -45,7 +47,11 @@ module VimeoServices
 
       raise "HTTP #{resp.code}: #{resp.body&.slice(0, 500)}" unless resp.success?
 
-      JSON.parse(resp.body)
+      if json
+        JSON.parse(resp.body)
+      else
+        resp.body
+      end
     rescue => e
       Rails.logger.error("VimeoServices::ApiClient.fetch failed: #{e.message}")
       nil

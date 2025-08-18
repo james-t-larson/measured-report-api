@@ -8,7 +8,7 @@ module Validators
       grade = FleschKincaid.read(@content).score
 
       unless (ACCEPTABLE_SCORE_RANGE).cover?(grade)
-        raise ReadabilityError, "[Validators::Readability] Out-of-range score: #{grade}, Acceptable Range: #{ACCEPTABLE_WORD_COUNTS}"
+        raise ReadabilityError, "[Validators::Readability] Out-of-range score: #{grade}, Acceptable Range: #{ACCEPTABLE_SCORE_RANGE}"
       end
 
       grade

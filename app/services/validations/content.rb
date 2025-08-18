@@ -14,17 +14,20 @@ module Validations
     ].freeze
 
     def self.validate!(markdown)
-      errors = VALIDATORS.each_with_object([]) do |validator, errs|
+      failed = false
+      results = VALIDATORS.map do |validator|
         begin
-          validator.new(markdown).validate!
+          result = validator.new(markdown).validate!
+          "Validation Passed, #{validator.name.demodulize}: #{result}"
         rescue StandardError => e
-          errs << e.message
+          failed = true
+          "Validation Failed: #{e.message}"
         end
       end
 
-      raise ValidationError, errors.join("; ") unless errors.empty?
+      puts results
 
-      true
+      failed
     end
   end
 end

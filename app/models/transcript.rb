@@ -11,4 +11,6 @@ class Transcript < ApplicationRecord
   belongs_to :video
 
   validates :external_id, uniqueness: { allow_nil: false }
+
+  scope :in_progress, -> { where(pipeline: [ :needs_vtt, :retry ]) }
 end

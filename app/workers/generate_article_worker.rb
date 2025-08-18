@@ -24,8 +24,6 @@ class GenerateArticleWorker
     GenerateArticleWorker.process_entries
   end
 
-  class HighSentimentError < StandardError; end
-
   def self.process_entries
     if FeedEntry.fresh_souls.exists?
       feed_entry = FeedEntry.fresh_souls.first

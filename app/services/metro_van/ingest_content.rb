@@ -1,4 +1,4 @@
-module MetroVanServices
+module MetroVan
   class IngestContent
     def meeting(meeting_payload)
       attributes = {

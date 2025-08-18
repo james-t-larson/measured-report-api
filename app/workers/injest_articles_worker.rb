@@ -1,6 +1,6 @@
 # TODO: Change to news outlet theme
 # - Potential pipeline
-#   - Journalist Collects Story Ideas/Leads (Feed Entries)
+#   - Journalist Collects Story Ideas/Leads (Workers)
 #   - Editor determines timeliness, novelty, and relevance
 #     - Will require social media scrapping, based on entities mentioned
 #     - This is where we do find the social score of the article
@@ -12,12 +12,14 @@
 #   - Reporter Writes arficles (LLM Generates Content)
 #   - Article is sent to Standard Editors Team
 #     - Fact Check Ombudsmen performs the same steps as above
+#     - Word count Ombudsmen ensures length is correct
 #     - Sentiment Ombudsmen approves or rejects (Sentiment Analysis), potnetially sends back to Journalist
+#     - Grade Level Ombudsmen ensures it's below 8th grade (Flesch Kinkaid Grade Level)
 #   - Article is sent to Legal Department for complaiance and risk assesment
 #     - Plagerism Ombudsmen checks original content against Journalist's article, approves/rejects
-#   - Once all checks have passed, the story is sent to the Editor-in-Chief to publish the aricle (Marked as published and publish_at time is set)
+#   - Once all checks have passed, the story is sent to the Editor-in-Chief (Me) for review
+#     - Once approved, the article is published
 #   - After this step, articles are marketed and corrections are published (daily review for corrections worker is needed)
-#
 
 class InjestArticlesWorker
   include Sidekiq::Worker

@@ -1,4 +1,4 @@
-module VimeoServices
+module Vimeo
   module IngestContent
     def self.transcript(video_record)
       res  = VimeoServices::ApiClient.fetch_texttracks(video_record.external_id)
@@ -17,7 +17,6 @@ module VimeoServices
       nil
     end
 
-    # TODO: Finish injecting content for transcripts. This is simply to make citations easier
     def self.vtt(transcript_record)
       data = VimeoServices::ApiClient.fetch_vtt(transcript_record.vtt_link)
       return unless data.present?

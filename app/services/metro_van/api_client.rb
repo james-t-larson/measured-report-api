@@ -1,4 +1,4 @@
-module MetroVanServices
+module MetroVan
   class ApiClient
     include HTTParty
     base_uri "https://metrovancouver.org"

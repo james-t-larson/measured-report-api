@@ -1,11 +1,11 @@
-module MetroVanWorkers
-  class ContentOrchestrator
+module MetroVan
+  class ContentPipeline
     include Sidekiq::Worker
     sidekiq_options queue: :default, retry: false
 
     def perform
-      ingest   = MetroVanServices::IngestContent.new
-      api_client = MetroVanServices::ApiClient.new
+      ingest   = MetroVan::IngestContent.new
+      api_client = MetroVan::ApiClient.new
 
       meetings = api_client.fetch_meetings
 
@@ -15,7 +15,7 @@ module MetroVanWorkers
         ingest.videos(meeting_record, payload)
       end
 
-      VimeoWorkers::ContentPipeline.new.perform
+      Vimeo::ContentPipeline.perform_async
     end
   end
 end

@@ -31,6 +31,8 @@ module Vimeo
       fetch("/videos/#{id}")
     end
 
+    private
+
     def self.fetch(path, method: :get, query: nil, body: nil, headers: {}, json: true)
       sess = session_headers or raise "no session"
       url  = path.start_with?("http://", "https://") ? path : "#{API_BASE_URI}#{path}"
@@ -53,7 +55,7 @@ module Vimeo
         resp.body
       end
     rescue => e
-      Rails.logger.error("VimeoServices::ApiClient.fetch failed: #{e.message}")
+      Rails.logger.error("Vimeo::ApiClient.fetch failed: #{e.message}")
       nil
     end
 
@@ -72,7 +74,7 @@ module Vimeo
         "Cookie" => cookie_header
       )
     rescue => e
-      Rails.logger.error("VimeoServices::ApiClient.session_headers failed: #{e.message}")
+      Rails.logger.error("Vimeo::ApiClient.session_headers failed: #{e.message}")
       nil
     end
   end

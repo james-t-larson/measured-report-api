@@ -5,4 +5,8 @@ class Meeting < ApplicationRecord
 
   validates :external_id, presence: true
   validates :title, presence: true
+
+  def references
+    [ documents, videos ].flatten
+  end
 end

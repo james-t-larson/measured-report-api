@@ -1,12 +1,15 @@
 class Video < ApplicationRecord
+  # TODO: Add validations for each pipeline status
+  # Example: cannot be moved into failed if it has a title and link
+  # Or: cannot be set to complete if title or link have not been added
+  #
+  # TODO: the link can be added without getting it from Vimeo
+
   PIPELINE_STATES = {
-    no_transcript: -2,
-    no_details: -1,
-    needs_details: 0,
-    needs_transcript: 1,
-    retry_details: 2,
-    retry_transcript: 3,
-    completed: 4
+    failed: -1,
+    pending: 0,
+    retry: 2,
+    complete: 4
   }.freeze
 
   enum pipeline: PIPELINE_STATES
@@ -15,6 +18,15 @@ class Video < ApplicationRecord
   has_one :transcript, inverse_of: :video, dependent: :destroy
 
   validates :external_id, presence: true
+  validate :ensure_metadata, if: -> {
+    will_save_change_to_pipeline? && pipeline_change_to_be_saved&.last == "complete"
+  }
 
-  scope :in_progress, -> { where(pipeline: [ :needs_details, :needs_transcript, :retry_details, :retry_transcript ]) }
+  scope :in_progress, -> { where(pipeline: [ :pending, :retry ]) }
+
+  private
+
+  def ensure_metadata
+    errors.add(:pipeline, "cannot be set to complete unless all metadata is present") if title.blank? || link.blank? || transcript.blank?
+  end
 end

@@ -9,7 +9,7 @@ module MetroVan
     }.freeze
 
     def fetch_meetings(start_date: nil, end_date: nil)
-      start_date ||= 1.month.ago.beginning_of_day.utc.iso8601
+      start_date ||= 6.months.ago.beginning_of_day.utc.iso8601
       end_date   ||= Time.current.beginning_of_day.utc.iso8601
 
       endpoint = "/boards/_api/Web/Lists/GetByTitle('Meetings')/Items"

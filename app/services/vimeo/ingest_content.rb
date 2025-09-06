@@ -1,42 +1,44 @@
 module Vimeo
   module IngestContent
-    def self.transcript(video_record)
-      res  = VimeoServices::ApiClient.fetch_texttracks(video_record.external_id)
-      data = Array(res&.dig("data"))
+    def self.transcript(video, raw_texttracks)
+      data = Array(raw_texttracks&.dig("data"))
       active = data.find { |t| t.dig("active") }
       id = active.dig("id").to_s
       vtt_link = active.dig("link")
       return if active.blank? || id.blank?
 
-      Transcript.find_or_create_by!(external_id: id) do |t|
-        t.video   = video_record
-        t.vtt_link = vtt_link
-      end
+      Transcript.find_or_create_by!({
+        external_id: id,
+        video: video,
+        vtt_link: vtt_link
+      }).reload
     rescue => e
       Rails.logger.error("[VimeoServices::IngestContent] ingest transcropt failed: #{e.message}")
       nil
     end
 
-    def self.vtt(transcript_record)
-      data = VimeoServices::ApiClient.fetch_vtt(transcript_record.vtt_link)
-      return unless data.present?
+    def self.vtt(transcript, raw_vtt)
+      return unless raw_vtt.present?
 
-      Transcript.update!(vtt: data)
+      transcript.update!(vtt: raw_vtt)
+
+      transcript.reload
     rescue => e
       Rails.logger.error("[VimeoServices::IngestContent] ingest transcript content failed: #{e.message}")
       nil
     end
 
-    def self.video(video_record)
-      data = VimeoServices::ApiClient.fetch_video(video_record.external_id)
-      return unless data.present?
+    def self.video(video, data)
+      return unless data.present? && video.present?
 
-      Rails.logger.info("[VimeoServices::IngestContent]: Injesting Video #{video_record.id} (#{video_record.title}).")
+      Rails.logger.info("[VimeoServices::IngestContent]: Injesting Video #{video.id} (#{video.title}).")
 
-      video_record.update(
+      video.update!(
         title: data["name"],
         link:  data["link"]
       )
+
+      video.reload
     rescue => e
       Rails.logger.error("[VimeoServices::IngestContent] Video ingestion failed: #{e.message}")
       nil

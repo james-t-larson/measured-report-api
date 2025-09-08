@@ -15,7 +15,7 @@ module MetroVan
         ingest.videos(meeting_record, payload)
       end
 
-      Vimeo::ContentPipeline.perform_async
+      Vimeo::Orchestrator.perform_async
     end
   end
 end

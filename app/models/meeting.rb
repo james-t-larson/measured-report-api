@@ -6,6 +6,8 @@ class Meeting < ApplicationRecord
   validates :external_id, presence: true
   validates :title, presence: true
 
+  scope :most_recent, -> { order(start_datetime: :desc).first }
+
   def references
     [ documents, videos ].flatten
   end

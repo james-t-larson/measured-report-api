@@ -35,7 +35,7 @@ module Vimeo
         Rails.logger.info("[Vimeo::VideoProcessor] Video #{video.id} (#{video.title}) completed.")
       end
 
-      Vimeo::ContentPipeline.perform_async
+      Vimeo::Orchestrator.perform_async
     end
   end
 end

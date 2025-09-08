@@ -7,7 +7,10 @@ class CreateArticles < ActiveRecord::Migration[7.2]
       t.string :sources
       t.references :category, null: false, foreign_key: true
       t.string :image
-      t.float :sentiment_score
+      t.float :sentiment
+      t.integer :word_count
+      t.integer :readability
+      t.integer :pipeline, default: 0, null: false
 
       t.timestamps
     end

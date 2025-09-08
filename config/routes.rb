@@ -3,30 +3,30 @@ Rails.application.routes.draw do
   require "sidekiq-scheduler/web"
   mount Sidekiq::Web => "/sidekiq"
 
-  # THE BELOW SHOULD WORK FOR CREATING SCOPED DEVISE/ActiveAdmin routes
-  # ActiveAdmin.routes(self)
-  # devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
+  devise_for :admin_users, ActiveAdmin::Devise.config
+
   # devise_for :users, controllers: {
-  #   sessions: 'users/sessions',
-  #   registrations: 'users/registrations',
+  #   sessions: "users/sessions",
+  #   registrations: "users/registrations"
   #   # Add other controllers as needed
   # }
-
-  namespace :admin do
-    namespace :v1 do
-      resources :articles
-      resources :categories do
-        resources :articles, controller: "articles"
-      end
-    end
-  end
+  #
+  # namespace :admin do
+  #   namespace :v1 do
+  #     resources :articles
+  #     resources :categories do
+  #       resources :articles, controller: "articles"
+  #     end
+  #   end
+  # end
 
   namespace :api do
     namespace :v1 do
-      devise_for :users, skip: [ :registrations, :passwords ], controllers: {
-        sessions: "api/v1/users/sessions"
-      }
-      get "users/me", to: "users/sessions#show"
+      # devise_for :users, skip: [ :registrations, :passwords ], controllers: {
+      #   sessions: "api/v1/users/sessions"
+      # }
+      # get "users/me", to: "users/sessions#show"
       resources :articles, only: [ :index, :show ]
       resources :categories, only: [ :index, :show ] do
         resources :articles, only: [ :index ], controller: "articles"

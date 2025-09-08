@@ -1,27 +1,5 @@
-# TODO: Change to news outlet theme
-# - Potential pipeline
-#   - Journalist Collects Story Ideas/Leads (Workers)
-#   - Editor determines timeliness, novelty, and relevance
-#     - Will require social media scrapping, based on entities mentioned
-#     - This is where we do find the social score of the article
-#     - There is a chance that the article will be published before peolple are talking about it
-#     - To mitigate this, I can either slow down the rate of publication, or start a perioodic job
-#   - Journalist creates a pitch (Pulls out entities), and relates them to the story
-#   - Editor checks if story has not aleady been writen (Deduplication)
-#     - Plagerism checkers and entity similarity might help here
-#   - Reporter Writes arficles (LLM Generates Content)
-#   - Article is sent to Standard Editors Team
-#     - Fact Check Ombudsmen performs the same steps as above
-#     - Word count Ombudsmen ensures length is correct
-#     - Sentiment Ombudsmen approves or rejects (Sentiment Analysis), potnetially sends back to Journalist
-#     - Grade Level Ombudsmen ensures it's below 8th grade (Flesch Kinkaid Grade Level)
-#   - Article is sent to Legal Department for complaiance and risk assesment
-#     - Plagerism Ombudsmen checks original content against Journalist's article, approves/rejects
-#   - Once all checks have passed, the story is sent to the Editor-in-Chief (Me) for review
-#     - Once approved, the article is published
-#   - After this step, articles are marketed and corrections are published (daily review for corrections worker is needed)
-
-class InjestArticlesWorker
+module Coquitlam
+  class Injest
   include Sidekiq::Worker
   sidekiq_options queue: :default
 
@@ -99,5 +77,6 @@ class InjestArticlesWorker
 
   def current_feed(increase_count = false)
     Feed.find_by(name: Rails.cache.read(REDIS_FEED_CURSOR_KEY))
+  end
   end
 end

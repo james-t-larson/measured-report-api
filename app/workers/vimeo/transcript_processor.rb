@@ -29,7 +29,7 @@ module Vimeo
         Rails.logger.info("[Vimeo::TranscriptProcessor] Transcript #{transcript.id} completed.")
       end
 
-      Vimeo::ContentPipeline.perform_async
+      Vimeo::Orchestrator.perform_async
     end
   end
 end

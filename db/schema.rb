@@ -47,12 +47,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
     t.string "sources"
     t.bigint "category_id", null: false
     t.string "image"
-    t.float "sentiment_score"
+    t.float "sentiment"
+    t.integer "word_count"
+    t.integer "readability"
+    t.integer "pipeline"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "feed_entry_id", null: false
     t.index ["category_id"], name: "index_articles_on_category_id"
-    t.index ["feed_entry_id"], name: "index_articles_on_feed_entry_id"
   end
 
   create_table "categories", force: :cascade do |t|
@@ -149,7 +150,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
   end
 
   add_foreign_key "articles", "categories"
-  add_foreign_key "articles", "feed_entries"
   add_foreign_key "documents", "meetings"
   add_foreign_key "feed_entries", "categories"
   add_foreign_key "feed_entries", "feeds"

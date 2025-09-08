@@ -8,31 +8,12 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-require 'faker'
-
-def generate_fake_apa_citation
-  word_count = 5
-
-  author = Faker::Name.name
-  date = Time.now.strftime("%Y, %B %d")
-  title = Faker::Lorem.sentence(word_count: word_count)
-  publisher = Faker::Company.name
-  city = Faker::Address.city
-
-  title = title.chomp('.')
-
-  "#{author} (#{date}). #{title}. #{city}: #{publisher}."
-end
-
 # TODO: Certain categories do not need sentimenlity checked
 # I imagine that this is the case for other verfications
 # -- Create a validations required table to skip/require validations
 categories = [
-  { name: 'Politics', slug: 'politics' },
-  { name: 'World', slug: 'world' },
-  { name: 'Technology', slug: 'technology' },
-  { name: 'Finance', slug: 'finance' },
-  { name: 'Sports', slug: 'sports' }
+  { name: 'Civic Affairs', slug: 'civics' },
+  { name: 'Traffic', slug: 'traffic' }
 ]
 
 categories.each_with_index do |category, index|
@@ -44,39 +25,9 @@ end
 
 feeds = [
   {
-    url: "https://rss.politico.com/politics-news.xml",
-    name: "Politico Politics",
-    category_id: Category.find_by(name: 'Politics').id
-  },
-  {
-    url: "https://feeds.npr.org/1014/rss.xml",
-    content_selector: '.story',
-    name: "NPR Politics",
-    category_id: Category.find_by(name: 'Politics').id
-  },
-  {
-    url: "https://feeds.bbci.co.uk/news/world/rss.xml",
-    content_selector: "article",
-    name: "BBC World",
-    category_id: Category.find_by(name: 'World').id
-  },
-  {
-    url: "https://www.theverge.com/rss/index.xml",
-    content_selector: 'article',
-    name: "The Verge Technology",
-    category_id: Category.find_by(name: 'Technology').id
-  },
-  {
-    url: "https://www.cnbc.com/id/10000664/device/rss/rss.html",
-    content_selector: '.group',
-    name: "CNBC Finance",
-    category_id: Category.find_by(name: 'Finance').id
-  },
-  {
-    url: "https://www.espn.com/espn/rss/news",
-    content_selector: '.container',
-    name: "ESPN Sports",
-    category_id: Category.find_by(name: 'Sports').id
+    url: "https://www.coquitlam.ca/RSSFeed.aspx?ModID=1&CID=Road-Work-and-Construction-5",
+    name: "Coquitlam Construction",
+    category_id: Category.find_by(slug: 'traffic').id
   }
 ]
 

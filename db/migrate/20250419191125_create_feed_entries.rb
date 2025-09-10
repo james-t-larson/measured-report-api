@@ -8,9 +8,7 @@ class CreateFeedEntries < ActiveRecord::Migration[7.1]
       t.string :summary
       t.string :url
       t.string :image
-      t.text :content, null: false
-      t.float :sentiment_score, null: false
-      t.integer :generation_edict, default: 0, null: false
+      t.text :content
       t.datetime :published_at
 
       t.timestamps

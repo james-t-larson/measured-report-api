@@ -50,7 +50,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
     t.float "sentiment"
     t.integer "word_count"
     t.integer "readability"
-    t.integer "pipeline"
+    t.integer "pipeline", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_articles_on_category_id"
@@ -81,9 +81,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
     t.string "summary"
     t.string "url"
     t.string "image"
-    t.text "content", null: false
-    t.float "sentiment_score", null: false
-    t.integer "generation_edict", default: 0, null: false
+    t.text "content"
     t.datetime "published_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

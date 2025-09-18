@@ -1,5 +1,10 @@
 metro_van_content_orchestrator:
-  every: ["30m", first_in: '0s']
+  every: ["12h", first_in: '0s']
   class: "MetroVan::ContentPipeline"
   queue: default
   description: "Starts the MetroVan content orchestrator"
+coquitlam_construction:
+  every: ["12h", first_in: '0s']
+  class: "Coquitlam::ConstructionImporter"
+  queue: default
+  description: "Collects Traffic Interuptions due to Construction"

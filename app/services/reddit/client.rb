@@ -1,4 +1,3 @@
-require "httparty"
 
 module Reddit
   class Client
@@ -15,7 +14,6 @@ module Reddit
       @password = "gaksIw-basfyq-rorfy4"
       @access_token = authenticate
     end
-
 
     private
 
@@ -37,7 +35,6 @@ module Reddit
       if response.code == 200
         response.parsed_response["access_token"]
       else
-        Rails.logger.error "[Reddit::Client] Auth failed: #{response.code} – #{response.body}"
         raise "Reddit auth failed: #{response.body}"
       end
     end
@@ -51,23 +48,24 @@ module Reddit
 
     def post(url:, body:, **options)
       body = options[:s3_request] ? body : payload(**body)
-      message = "[Reddit::Client] Post request: url=#{url}, body=#{body}"
+      if options[:file] && options[:file].is_a?(File)
+        require "multipart_post"
+        body["file"] = UploadIO.new(options[:file], body["Content-Type"] || "application/octet-stream")
+      end
+
       response = HTTParty.post(
         url,
-        headers: auth_headers,
-        body: body
+        headers: options[:file] ? {} : auth_headers,
+        body: body,
+        multipart: options[:file] || false
       )
 
       if response.code.between?(200, 299)
-        message = "[Reddit::Client] Post request SUCCESS: code=#{response.code}, url=#{url}, body=#{body}, response=#{response.body}, auth_headers=#{auth_headers}"
-        Rails.logger.error(message)
         return response if options[:s3_request]
 
         response.parsed_response
       else
-        message = "[Reddit::Client] Post request FAILED: code=#{response.code}, url=#{url}, body=#{body}, response=#{response.body}, auth_headers=#{auth_headers}"
-        Rails.logger.error(message)
-        raise message
+        raise "[Reddit::Client] Post request FAILED: code=#{response.code}, url=#{url}, body=#{body}, response=#{response.body}, auth_headers=#{auth_headers}"
       end
     end
 
@@ -110,33 +108,89 @@ module Reddit
       payload
     end
 
-    def upload_image(image_path:)
-      mime = detect_mime_type(image_path)
+    def connect_ws(ws_url, asset_id)
+      processed = false
+
+      EM.run do
+        ws = Faye::WebSocket::Client.new(ws_url)
+
+        ws.on :open do |event|
+          Rails.logger.info "[Reddit::Client] WebSocket connection opened to #{ws_url}"
+        end
+
+        ws.on :message do |event|
+          Rails.logger.info "[Reddit::Client] WebSocket message: #{event.data.inspect}"
+
+          begin
+            data = JSON.parse(event.data)
+          rescue JSON::ParserError => e
+            Rails.logger.error "[Reddit::Client] WebSocket JSON parse error: #{e.message}"
+            next
+          end
+
+          if data["asset_id"] == asset_id && data["processing_state"] == "succeeded"
+            Rails.logger.info "[Reddit::Client] WebSocket asset succeeded: #{data.inspect}"
+            processed = true
+            ws.close
+            EM.stop
+          end
+        end
+
+        ws.on :error do |e|
+          Rails.logger.error "[Reddit::Client] WebSocket error: #{e.message}"
+          EM.stop
+        end
+
+        ws.on :close do |event|
+          Rails.logger.info "[Reddit::Client] WebSocket closed: code=#{event.code}, reason=#{event.reason}"
+          EM.stop unless processed
+        end
+      end
+
+      raise "Image processing failed or timed out" unless processed
+
+      processed
+    end
+
+    def upload_image(temp_file:, mimetype: nil)
+      mimetype ||= detect_mime_type(temp_file)
 
       lease = post(
         url: MEDIA_ASSET_URL,
-        body: { filepath: File.basename(image_path), mimetype: mime },
+        body: { filepath: File.basename(temp_file), mimetype: mimetype },
         s3_request: true
       )
 
-      args  = lease.dig("args") || lease.dig("json", "args")
-      asset = lease.dig("asset") || lease.dig("json", "asset")
-      raise "Unexpected lease shape: #{lease.inspect}" unless args && asset
+      fields = lease.dig("args", "fields")
+      action = lease.dig("args", "action")
+      asset = lease.dig("asset")
+      asset_id, processed, ws_url = asset&.values_at("asset_id", "processing_state", "websocket_url")
 
-      asset_id = asset["asset_id"] || asset["id"] || asset["assetId"]
-      raise "Missing asset_id in lease: #{asset.inspect}" unless asset_id
+      Rails.logger.info <<~LOG
+        [Reddit::Client] Extracted values:
+          - fields present? : #{fields.present?}
+          - action present? : #{action.present?}
+          - asset present?  : #{asset.present?}
+          - asset_id present?  : #{asset_id.present?}
+          - processed present?  : #{processed.present?}
+          - ws_url present?  : #{ws_url.present?}
+      LOG
+
+      raise "Invalid asset response: #{lease.inspect}" if [ action, fields, asset_id, processed, ws_url ].any?(&:nil?)
+
+      # action_url = action.start_with?("http") ? action : "https:#{action}"
+      # action_body = fields.each_with_object({}) do |field, body|
+      #   body[field["name"]] = field["value"]
+      # end
+      #
+      # lease = post(
+      #   url: action_url,
+      #   body: action_body,
+      #   s3_request: true,
+      #   file: temp_file
+      # )
 
       Rails.logger.info "[Reddit::Client] Uploaded image asset #{asset_id} to S3"
-
-      10.times do
-        url = "#{OAUTH_BASE}/api/media/asset"
-        resp = get(url: "#{url}/#{asset_id}")
-        state = resp.dig("asset", "processing_state") || resp.dig("processing_state")
-        Rails.logger.info "[Reddit::Client] resp=#{resp}"
-
-        break if state != "incomplete"
-        sleep(3 + rand) # 3s + jitter
-      end
 
       asset_id
     end

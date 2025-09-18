@@ -1,5 +1,5 @@
 module Coquitlam
-  class ConstructionEvents
+  class ConstructionImporter
     include Sidekiq::Worker
     sidekiq_options queue: :default
 
@@ -8,7 +8,7 @@ module Coquitlam
       entries = Rss::Client.fetch(url: feed.url)
 
       entries.each do |entry|
-        Rss::Import.save(entry, feed)
+        Rss::Import.new(entry, feed)
       end
     rescue => e
       Rails.logger.error "[Coquitlam::ConstructionEvents] Failed: #{e.message}"

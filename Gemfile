@@ -24,6 +24,9 @@ gem "rack-cors"
 
 gem "dotenv-rails"
 
+gem "faye-websocket"
+gem "multipart-post"
+
 gem "activeadmin"
 gem "devise"
 gem "sassc"

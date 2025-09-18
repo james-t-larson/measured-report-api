@@ -41,6 +41,8 @@ gem "sidekiq-unique-jobs"
 gem "sentimental"
 gem "flesch_kincaid", require: "flesch_kincaid"
 
+gem "config"
+
 # DOCS: https://rubygems.org/gems/git-version-bump
 gem "git-version-bump", "~> 0.19.1"
 

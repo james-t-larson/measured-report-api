@@ -5,6 +5,6 @@ metro_van_content_orchestrator:
   description: "Starts the MetroVan content orchestrator"
 coquitlam_construction:
   every: ["12h", first_in: '0s']
-  class: "Coquitlam::ConstructionImporter"
+  class: "Coquitlam::Crawler"
   queue: default
   description: "Collects Traffic Interuptions due to Construction"

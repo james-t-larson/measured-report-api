@@ -1,0 +1,11 @@
+feeds:
+  coquitlam:
+    - name: "TriCities Dispatch"
+      url: "https://tricitiesdispatch.com/category/coquitlam/feed"
+      category: "coquitlam"
+    - name: "Coquitlam Construction"
+      url: "https://www.coquitlam.ca/RSSFeed.aspx?ModID=1&CID=Road-Work-and-Construction-5"
+      category: "traffic"
+    - name: "TriCity Local News"
+      url: "https://www.tricitylocalnews.com/category/tri-cities/feed"
+      category: "coquitlam"

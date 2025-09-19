@@ -27,7 +27,7 @@ feeds = [
   {
     url: "https://www.coquitlam.ca/RSSFeed.aspx?ModID=1&CID=Road-Work-and-Construction-5",
     name: "Coquitlam Construction",
-    category_id: Category.find_by(slug: 'traffic').id
+    category_id: Category.find_by(slug: 'coquitlam').id
   }
 ]
 

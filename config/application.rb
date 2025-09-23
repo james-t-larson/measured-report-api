@@ -21,6 +21,8 @@ module MeasuredReportApi
       url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0")
     }
 
+    config.time_zone = "Pacific Time (US & Canada)"
+
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore
     config.api_only = false

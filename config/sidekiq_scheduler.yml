@@ -1,5 +1,5 @@
-coquitlam_crawler:
-  cron: "0,30 17-23 * * *" # Run every 30 minutes from 5pm until midnight
-  class: "Coquitlam::Crawler"
+coquitlam:
+  every: ["12h", first_in: '0s']
+  class: "Coquitlam::Orchestrator"
   queue: default
-  description: "Collects All Coquitlamd Related data from various RSS Feeds"
+  description: "Posts new RSS feed entries to reddit roughly every other day"

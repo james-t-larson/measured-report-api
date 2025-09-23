@@ -5,12 +5,13 @@ module Reddit
     OAUTH_BASE = "https://oauth.reddit.com"
     TOKEN_URL = "#{DEFAULT_BASE}/api/v1/access_token"
     MEDIA_ASSET_URL = "#{OAUTH_BASE}/api/media/asset.json"
+    USER_NAME = "CoquitlamReport"
 
     def initialize
       @user_agent = "agent:coquitlam-bot (by u/CoquitlamReport)"
       @client_id = "1D6VcYqVk0G6gc-szc34Ew"
       @client_secret = "fKNBcwEzYdYyrlNxzXKo7b5ESHND1Q"
-      @username = "CoquitlamReport"
+      @username = USER_NAME
       @password = "gaksIw-basfyq-rorfy4"
       @access_token = authenticate
     end

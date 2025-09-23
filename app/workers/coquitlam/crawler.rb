@@ -20,7 +20,7 @@ module Coquitlam
         Rails.logger.warn "[Coquitlam::Crawler] Feed with ID #{feed_id} not found"
       end
 
-      Coquitlam::Crawler.perform_in(10.seconds, feeds) unless feeds.empty?
+      Coquitlam::Crawler.new.perform(feeds) unless feeds.empty?
     rescue => e
       Rails.logger.error "[Coquitlam::Crawler] Failed: #{e.message}"
     end

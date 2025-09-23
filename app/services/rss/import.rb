@@ -3,6 +3,17 @@ module Rss
     def initialize(entry, feed)
       Rails.logger.debug "[RSS::Import] Importing entry: #{entry.title}"
 
+      entry_text = [
+        entry&.title,
+        entry&.summary,
+        entry&.content
+      ].compact.join(" ")
+
+      unless feed.passes_filters?(entry_text)
+        Rails.logger.info "[RSS::Import] Skipped entry due to filters: #{entry.title}"
+        return
+      end
+
       processed_entry = {
         title:           entry&.title,
         url:             entry&.url,

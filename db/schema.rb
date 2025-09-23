@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
+ActiveRecord::Schema[7.2].define(version: 2025_09_20_221906) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -90,6 +90,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
     t.index ["feed_id"], name: "index_feed_entries_on_feed_id"
   end
 
+  create_table "feed_filters", force: :cascade do |t|
+    t.bigint "feed_id", null: false
+    t.string "pattern"
+    t.string "function"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["feed_id"], name: "index_feed_filters_on_feed_id"
+  end
+
   create_table "feeds", force: :cascade do |t|
     t.string "url", null: false
     t.string "name", null: false
@@ -151,6 +160,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_07_235919) do
   add_foreign_key "documents", "meetings"
   add_foreign_key "feed_entries", "categories"
   add_foreign_key "feed_entries", "feeds"
+  add_foreign_key "feed_filters", "feeds"
   add_foreign_key "feeds", "categories"
   add_foreign_key "transcripts", "videos"
   add_foreign_key "videos", "meetings"

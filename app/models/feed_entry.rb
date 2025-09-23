@@ -5,4 +5,6 @@ class FeedEntry < ApplicationRecord
 
   validates :feed_id, :category_id, :guid, presence: true
   validates :url, format: URI.regexp(%w[http https]), presence: true
+
+  scope :most_recent, -> { order(published_at: :desc) }
 end

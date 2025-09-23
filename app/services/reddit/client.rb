@@ -28,7 +28,7 @@ module Reddit
           grant_type: "password",
           username: @username,
           password: @password,
-          scope: "submit identity"
+          scope: "submit identity read history"
         }
       )
 

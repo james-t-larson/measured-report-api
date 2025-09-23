@@ -1,10 +1,5 @@
-metro_van_content_orchestrator:
-  every: ["12h", first_in: '0s']
-  class: "MetroVan::ContentPipeline"
-  queue: default
-  description: "Starts the MetroVan content orchestrator"
-coquitlam_construction:
-  every: ["12h", first_in: '0s']
+coquitlam_crawler:
+  cron: "0,30 17-23 * * *" # Run every 30 minutes from 5pm until midnight
   class: "Coquitlam::Crawler"
   queue: default
-  description: "Collects Traffic Interuptions due to Construction"
+  description: "Collects All Coquitlamd Related data from various RSS Feeds"

@@ -5,73 +5,56 @@ module Coquitlam
     sidekiq_options(
       queue: :default,
       retry: 3,
-      lock: :until_and_while_executing,
-      lock_timeout: 0,
-      on_conflict: { client: :log, server: :raise }
     )
 
-    def self.sidekiq_unique_context(job)
-      [ job["class"], job["queue"] ]
+    SUBREDDIT = "coquitlamreport"
+
+    def posted_already?(link)
+      Reddit::History.new(subreddit: SUBREDDIT).link_posted_before?(link)
     end
 
-    sidekiq_retries_exhausted do |msg, _ex|
-      Rails.logger.info "[Coquitlam::Orchestrator] Failed 3x: #{msg}"
+    def key
+      "coquitlam:orchestrator:posted:#{Date.today}"
     end
 
-    START_HOUR   = 17  # 5 PM
-    END_HOUR     = 24  # Midnight
-    JITTER_RANGE = 25..35
-    LOCK_KEY     = "coquitlam:reddit:post:lock"
-    LOCK_TTL     = 36.hours
-    SUB_REDDIT   = "/r/coquitlamreport"
+    def record_worker_posted
+      Rails.cache.write(key, true, expires_in: 23.hours)
+    end
+
+    def worker_posted_today?
+      Rails.cache.read(key)
+    end
 
     def perform
-      now = Time.current
-      Rails.logger.info "[Coquitlam::Orchestrator] Started at #{now}"
-
-      start_time = now.change(hour: START_HOUR, min: 0, sec: 0) + 1.day
-      next_time = now + rand(JITTER_RANGE).minutes
-      Rails.logger.info "[Coquitlam::Orchestrator] Jittered delay: #{next_time.inspect}"
-
-      if now.hour < START_HOUR || now.hour >= END_HOUR
-        Rails.logger.info "[Coquitlam::Orchestrator] Outside window, scheduling for #{start_time}"
-        self.class.perform_at(start_time)
-        return
-      end
-
-      Rails.logger.info "[Coquitlam::Orchestrator] Running crawler"
-      Coquitlam::Crawler.new.perform
-
-      Rails.logger.info "[Coquitlam::Orchestrator] Attempting to acquire lock"
-      got_lock = Rails.cache.write(
-        LOCK_KEY,
-        true,
-        expires_in: LOCK_TTL,
-        unless_exist: true
-      )
-      Rails.logger.info "[Coquitlam::Orchestrator] Lock acquired? #{got_lock}"
-
-      newest_entry = FeedEntry.last
-      Rails.logger.info "[Coquitlam::Orchestrator] Newest entry: #{newest_entry&.id} at #{newest_entry&.created_at}"
-
-      new_entry = newest_entry.created_at > now
-      Rails.logger.info "[Coquitlam::Orchestrator] Is entry new? #{new_entry}"
-
-      if new_entry && got_lock
-        title = newest_entry.title
-        link = newest_entry.url
-        Rails.logger.info "[Coquitlam::Orchestrator] Publishing to #{SUB_REDDIT}: #{title} (#{link})"
-        # check if there have been any reddit posts in the last 36 hours
-        # if lock was got, but there is already a post, return
-        Reddit::Publish.new.link(subreddit: SUB_REDDIT, url: link, title: title)
-        self.class.perform_at(start_time)
+      if worker_posted_today?
+        Rails.logger.info("[Coquitlam::Orhestrator] Skipping job execution, posted today already")
         return
       else
-        Rails.logger.info "[Coquitlam::Orchestrator] Skipping publish (new_entry=#{new_entry}, got_lock=#{got_lock})"
+        Rails.logger.info("[Coquitlam::Orhestrator] Starting Coquitlam::Crawler.perform")
       end
 
-      Rails.logger.info "[Coquitlam::Orchestrator] Scheduling next run in #{next_time.inspect}"
-      self.class.perform_at(next_time)
+      Coquitlam::Crawler.new.perform
+      Rails.logger.info("[Coquitlam::Orhestrator] Finished crawler perform, fetching entries")
+
+      entries = FeedEntry.published_today
+      Rails.logger.info("[Coquitlam::Orhestrator] Found #{entries.size} entries")
+
+      entries.each do |entry|
+        Rails.logger.info("[Coquitlam::Orhestrator] Processing entry: #{entry.title} (#{entry.url})")
+
+        if posted_already?(entry.url)
+          Rails.logger.info("[Coquitlam::Orhestrator] Skipping already-posted entry: #{entry.url}")
+          next
+        else
+          Rails.logger.info("[Coquitlam::Orhestrator] Posting new link to Reddit: #{entry.url}")
+          Reddit::Publish.new.link(subreddit: SUBREDDIT, title: entry.title, url: entry.url)
+          record_worker_posted
+          Rails.logger.info("[Coquitlam::Orhestrator] Successfully posted entry, stopping loop")
+          break
+        end
+      end
+
+      Rails.logger.info("[Coquitlam::Orhestrator] Done processing entries")
     end
   end
 end

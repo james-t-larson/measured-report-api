@@ -21,7 +21,7 @@ module Reddit
     end
 
     def link(subreddit:, title:, url:)
-      post(
+      result = post(
         url: SUBMIT_URL,
         body: {
           subreddit: subreddit,
@@ -31,6 +31,11 @@ module Reddit
           url: url
         }
       )
+
+      key = Reddit::Keys.post_history(url: url)
+      Rails.cache.write(key, true) if result.present?
+
+      result
     end
   end
 end

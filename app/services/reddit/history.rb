@@ -1,13 +1,23 @@
 module Reddit
   class History < Client
-    HISTORY_URL = "https://oauth.reddit.com/user/#{USER_NAME}/submitted?limit=100"
+    def initialize(subreddit:)
+      super()
 
-    def last_post_time
-      posts = get(url: HISTORY_URL).dig("data", "children") || []
+      @url ||= "#{OAUTH_BASE}/r/#{subreddit}/search"
+    end
 
-      latest = posts.max_by { |p| p.dig("data", "created").to_i }
+    def link_posted_before?(url)
+      key = Reddit::Keys.post_history(url: url)
+      return true if Rails.cache.read(key)
 
-      latest.dig("data", "created")
+      url = "url:#{url}"
+      posts = get(url: @url, params: { q: url, type: :link, restrict_sr: 1 }).dig("data", "children")
+
+      posted_already = !posts.empty?
+
+      Rails.cache.write(key, posted_already)
+
+      posted_already
     end
   end
 end

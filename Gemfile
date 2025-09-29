@@ -33,6 +33,8 @@ gem "sassc"
 
 gem "faker"
 
+gem "foreman"
+
 gem "feedjira"
 gem "httparty"
 gem "sidekiq"

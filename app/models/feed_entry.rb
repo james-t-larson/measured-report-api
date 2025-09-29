@@ -7,4 +7,7 @@ class FeedEntry < ApplicationRecord
   validates :url, format: URI.regexp(%w[http https]), presence: true
 
   scope :most_recent, -> { order(published_at: :desc) }
+  scope :published_today, -> {
+    where(published_at: Time.zone.today.all_day)
+  }
 end

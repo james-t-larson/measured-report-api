@@ -1,5 +1,7 @@
+# Enqueque Manually for testing
 coquitlam:
-  every: ["12h", first_in: '0s']
+  cron: '*/30 19-23 * * mon,wed,fri,sun' # Every 30 minutes from 7pm to 11pm on odd days and sunday
   class: "Coquitlam::Orchestrator"
+  timezone: 'America/Los_Angeles'
   queue: default
-  description: "Posts new RSS feed entries to reddit roughly every other day"
+  description: "Posts new RSS feed entries to reddit every odd weekday day, and sunday"

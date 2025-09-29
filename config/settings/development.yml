@@ -1,20 +1,29 @@
 feeds:
   coquitlam:
     - name: "TriCities Dispatch"
-      url: "https://tricitiesdispatch.com/category/coquitlam/feed"
+      url: "https://tricitiesdispatch.com/feed/?s=coquitlam&post_type=post&posts_per_rss=10"
       category: "coquitlam"
-    - name: "Coquitlam Construction"
-      url: "https://www.coquitlam.ca/RSSFeed.aspx?ModID=1&CID=Road-Work-and-Construction-5"
-      category: "traffic"
     - name: "TriCity Local News"
       url: "https://www.tricitylocalnews.com/category/tri-cities/feed"
       category: "coquitlam"
       filters: 
         - exclude: 'port coquitlam'
         - include: 'coquitlam'
-    - name: "Coquitlam RCMP"
-      url: "https://rcmp.ca/en/feed-flux/news-nouvelles/division/e"
-      category: "coquitlam"
-      filters: 
-        - exclude: 'port coquitlam'
-        - include: 'coquitlam'
+    # - name: "Coquitlam Construction"
+    #   url: "https://www.coquitlam.ca/RSSFeed.aspx?ModID=1&CID=Road-Work-and-Construction-5"
+    #   category: "coquitlam"
+    # - name: "Coquitlam City News"
+    #   url: "https://www.coquitlam.ca/RSSFeed.aspx?ModID=1&CID=City-News-8"
+    #   category: "coquitlam"
+    # - name: "Van Sun - Coquitlam"
+    #   url: "https://vancouversun.com/tag/coquitlam/feed?per_page=100"
+    #   category: "coquitlam"
+    # - name: "Global News - Coquitlam"
+    #   url: "https://globalnews.ca/tag/coquitlam/feed"
+    #   category: "coquitlam"
+    # - name: "Coquitlam RCMP"
+    #   url: "https://rcmp.ca/en/feed-flux/news-nouvelles/division/e"
+    #   category: "coquitlam"
+    #   filters: 
+    #     - exclude: 'port coquitlam'
+    #     - include: 'coquitlam'

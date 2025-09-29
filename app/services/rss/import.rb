@@ -1,6 +1,7 @@
 module Rss
   class Import
     def initialize(entry, feed)
+      # TODO: Pass an option to filter anything out that wasn't posted today
       Rails.logger.debug "[RSS::Import] Importing entry: #{entry.title}"
 
       entry_text = [
@@ -10,7 +11,7 @@ module Rss
       ].compact.join(" ")
 
       unless feed.passes_filters?(entry_text)
-        Rails.logger.info "[RSS::Import] Skipped entry due to filters: #{entry.title}"
+        Rails.logger.info "[RSS::Import] Skipped entry due to filters: feed=#{feed.name} entry=#{entry.title}"
         return
       end
 

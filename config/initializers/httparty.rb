@@ -1,5 +1,7 @@
-HTTParty::Basement.default_options.update(
-  logger: Rails.logger,
-  log_level: :info,
-  log_format: :curl
-)
+unless Rails.env.development?
+  HTTParty::Basement.default_options.update(
+    logger: Rails.logger,
+    log_level: :info,
+    log_format: :curl
+  )
+end

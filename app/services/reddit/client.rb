@@ -70,16 +70,20 @@ module Reddit
       end
     end
 
-    def get(url:)
+    def get(url:, params: {})
       response = HTTParty.get(
         url,
-        headers: auth_headers
+        headers: auth_headers,
+        query: params
       )
+
+      full_url = response.request.last_uri.to_s
+      message = "[Reddit::Client] Get request url: url=#{full_url}"
+      Rails.logger.info(message)
 
       if response.code.between?(200, 299)
         message = "[Reddit::Client] Get request SUCCESS: code=#{response.code}, url=#{url}, response=#{response.body}"
-        Rails.logger.error(message)
-
+        Rails.logger.info(message)
         response.parsed_response
       else
         message = "[Reddit::Client] Get request FAILED: code=#{response.code}, url=#{url}, response=#{response.body}"

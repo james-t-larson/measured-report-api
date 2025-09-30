@@ -1,6 +1,7 @@
 # Enqueque Manually for testing
+# Use this link to design more recurring jobs: https://cron.help/#*/30_12-23_*_*_mon,wed,fri,sun
 coquitlam:
-  cron: '*/30 19-23 * * mon,wed,fri,sun' # Every 30 minutes from 7pm to 11pm on odd days and sunday
+  cron: '*/30 17-23 * * mon,wed,fri,sun' # Every 30 minutes from 7pm to 11pm on odd days and sunday
   class: "Coquitlam::Orchestrator"
   timezone: 'America/Los_Angeles'
   queue: default

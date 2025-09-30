@@ -1,11 +1,9 @@
 module Coquitlam
   class Orchestrator
     include Sidekiq::Worker
+    include Sidekiq::Status::Worker
 
-    sidekiq_options(
-      queue: :default,
-      retry: 3,
-    )
+    sidekiq_options queue: :default, retry: 3
 
     SUBREDDIT = "coquitlamreport"
 
@@ -13,48 +11,63 @@ module Coquitlam
       Reddit::History.new(subreddit: SUBREDDIT).link_posted_before?(link)
     end
 
-    def key
+    def posted_today_key
       "coquitlam:orchestrator:posted:#{Date.today}"
     end
 
     def record_worker_posted
-      Rails.cache.write(key, true, expires_in: 23.hours)
+      Rails.cache.write(posted_today_key, true, expires_in: 23.hours)
     end
 
     def worker_posted_today?
-      Rails.cache.read(key)
+      Rails.cache.read(posted_today_key)
     end
 
     def perform
+      store started_at: Time.current.to_s
+
       if worker_posted_today?
-        Rails.logger.info("[Coquitlam::Orhestrator] Skipping job execution, posted today already")
+        msg = "[Coquitlam::Orhestrator] Skipping, already posted today at #{Time.zone.now}"
+        store message: msg
+        Rails.logger.info(msg)
+        store completed_at: Time.current.to_s
         return
-      else
-        Rails.logger.info("[Coquitlam::Orhestrator] Starting Coquitlam::Crawler.perform")
       end
 
+      store crawler_started: Time.zone.now.to_s
       Coquitlam::Crawler.new.perform
-      Rails.logger.info("[Coquitlam::Orhestrator] Finished crawler perform, fetching entries")
+      store crawler_completed: Time.zone.now.to_s
 
       entries = FeedEntry.published_today
-      Rails.logger.info("[Coquitlam::Orhestrator] Found #{entries.size} entries")
+
+      store entries_published_today: entries.pluck(:title, :url).to_json
+      Rails.logger.info("[Orchestrator] Found #{entries.size} entries")
 
       entries.each do |entry|
-        Rails.logger.info("[Coquitlam::Orhestrator] Processing entry: #{entry.title} (#{entry.url})")
+        Rails.logger.info("[Orchestrator] Processing entry: #{entry.title} (#{entry.url})")
 
         if posted_already?(entry.url)
-          Rails.logger.info("[Coquitlam::Orhestrator] Skipping already-posted entry: #{entry.url}")
+          Rails.logger.info("[Orchestrator] Already posted: #{entry.url}")
+          store "posted_already_#{entry.id}" => entry.url
           next
         else
-          Rails.logger.info("[Coquitlam::Orhestrator] Posting new link to Reddit: #{entry.url}")
+          Rails.logger.info("[Orchestrator] Posting to Reddit: #{entry.url}")
           Reddit::Publish.new.link(subreddit: SUBREDDIT, title: entry.title, url: entry.url)
           record_worker_posted
-          Rails.logger.info("[Coquitlam::Orhestrator] Successfully posted entry, stopping loop")
+
+          store posted_url: entry.url, posted_title: entry.title
+          Rails.logger.info("[Orchestrator] Posted successfully, exiting loop")
           break
         end
+
+        store message: "No entries posted"
       end
 
-      Rails.logger.info("[Coquitlam::Orhestrator] Done processing entries")
+      store completed_at: Time.current.to_s
+      Rails.logger.info("[Orchestrator] Done")
+    rescue => e
+      store error: e.message, backtrace: e.backtrace.take(5).join("\n")
+      raise e
     end
   end
 end

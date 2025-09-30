@@ -1,5 +1,6 @@
 require "sidekiq"
 require "sidekiq-scheduler"
+require "sidekiq-status"
 require "sidekiq-unique-jobs"
 
 begin
@@ -19,12 +20,14 @@ begin
       Rails.logger.warn("Job #{job['class']} with args #{job['args']} failed after retries: #{ex.message}")
     end
 
-    config.client_middleware do |chain|
-      chain.add SidekiqUniqueJobs::Middleware::Client
-    end
-
     config.server_middleware do |chain|
       chain.add SidekiqUniqueJobs::Middleware::Server
+      chain.add Sidekiq::Status::ServerMiddleware
+    end
+
+    config.client_middleware do |chain|
+      chain.add Sidekiq::Status::ClientMiddleware
+      chain.add SidekiqUniqueJobs::Middleware::Client
     end
   end
 
@@ -32,11 +35,10 @@ begin
     config.redis = { url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0") }
 
     config.client_middleware do |chain|
+      chain.add Sidekiq::Status::ClientMiddleware
       chain.add SidekiqUniqueJobs::Middleware::Client
     end
   end
-
-  puts "[Sidekiq Init] Initializer loaded!"
 
 rescue => e
   puts "[Sidekiq Init] Failed to configure Sidekiq: #{e.message}"

@@ -27,10 +27,10 @@ module Coquitlam
       store started_at: Time.current.to_s
 
       if worker_posted_today?
-        msg = "[Coquitlam::Orhestrator] Skipping, already posted today at #{Time.zone.now}"
+        msg = "[Coquitlam::Orhestrator] Skipping, already posted today"
         store message: msg
         Rails.logger.info(msg)
-        store completed_at: Time.current.to_s
+        store stopped_at: Time.current.to_s
         return
       end
 
@@ -43,12 +43,14 @@ module Coquitlam
       store entries_published_today: entries.pluck(:title, :url).to_json
       Rails.logger.info("[Orchestrator] Found #{entries.size} entries")
 
+      posted_this_run = false
       entries.each do |entry|
         Rails.logger.info("[Orchestrator] Processing entry: #{entry.title} (#{entry.url})")
 
         if posted_already?(entry.url)
           Rails.logger.info("[Orchestrator] Already posted: #{entry.url}")
           store "posted_already_#{entry.id}" => entry.url
+          posted_this_run = true
           next
         else
           Rails.logger.info("[Orchestrator] Posting to Reddit: #{entry.url}")
@@ -59,8 +61,11 @@ module Coquitlam
           Rails.logger.info("[Orchestrator] Posted successfully, exiting loop")
           break
         end
+      end
 
-        store message: "No entries posted"
+      unless posted_this_run
+        store message: "No new entries to post."
+        Rails.logger.info("[Orchestrator] No new entries to post.")
       end
 
       store completed_at: Time.current.to_s

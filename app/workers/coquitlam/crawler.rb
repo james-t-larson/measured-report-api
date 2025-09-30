@@ -12,7 +12,7 @@ module Coquitlam
       feed = Feed.find_by(id: feed_id)
 
       if feed
-        entries = Rss::Client.fetch(url: feed.url)
+        entries = Rss::Client.fetch(url: feed.url, today_only: true)
         entries.each do |entry|
           Rss::Import.new(entry, feed)
         end

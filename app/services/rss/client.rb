@@ -1,12 +1,18 @@
 module Rss
   class Client
-    def self.fetch(url:)
+    def self.fetch(url:, today_only: false)
       response = HTTParty.get(url, headers: { "Accept" => "application/rss+xml" })
 
       Rails.logger.debug "[Rss::Client] HTTP response status: #{response.code}"
 
       if response.success?
-        Feedjira.parse(response.body).entries
+        entries = Feedjira.parse(response.body).entries
+
+        if today_only
+          entries.select { |entry| entry.published.to_date == Date.today }
+        else
+          entries
+        end
       else
         Rails.logger.warn "[Rss::Client] Failed to fetch RSS feed from #{url}"
         []
